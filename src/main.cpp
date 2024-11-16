@@ -1,5 +1,6 @@
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "lemlib/chassis/chassis.hpp"
 
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
@@ -17,13 +18,13 @@ pros::Imu imu(10);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation horizontalEnc(20);
+pros::Rotation horizontalEnc(1);
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
-pros::Rotation verticalEnc(-11);
+pros::Rotation verticalEnc(20);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -5.75);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -15);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -2.5);
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
@@ -135,15 +136,17 @@ ASSET(example_txt); // '.' replaced with "_" to make c++ happy
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-    
+    chassis.moveToPose(0, 20, 0, 4000);
 }
 
 /**
  * Runs in driver control
  */
 void opcontrol() {
+    // autonomous();
     // controller
     // loop to continuously update motors
+	bool is_intake_on = false;
     while (true) {
         // get joystick positions
         int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -157,6 +160,10 @@ void opcontrol() {
 		} else {
 			intake.move(0);
 		}
+        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
+			is_intake_on = !is_intake_on;
+		}
+		mogo.set_value(is_intake_on);
         // delay to save resources
         pros::delay(10);
     }
