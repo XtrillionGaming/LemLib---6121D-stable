@@ -10,7 +10,12 @@ pros::MotorGroup leftMotors({-10, 17, -18},
 pros::MotorGroup rightMotors({-14, -13, -12}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
 pros::adi::DigitalOut mogo('B');
-pros::MotorGroup intake({19, -11});
+pros::MotorGroup intake({19});
+pros::MotorGroup wallStake();
+pros::MotorGroup otherWallStake();
+
+//racism
+pros::Optical color(0);
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
@@ -21,9 +26,9 @@ pros::Rotation horizontalEnc(20);
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
 pros::Rotation verticalEnc(-11);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -5.75);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -5.75); // SUBJECT TO CHANGE
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -2.5);
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -2.5); // SUBJECT TO CHANGE
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
@@ -31,7 +36,7 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               17.5, // 10 inch track width
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
                               450, // drivetrain rpm is 360
-                              2 // horizontal drift is 2. If we had traction wheels, it would have been 8
+                              8 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 
 // lateral motion controller
@@ -154,6 +159,11 @@ void opcontrol() {
 			intake.move(-127);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
+            if (color.get_hue() >= 200.0 && color.get_hue() <= 220.0) {
+                pros::delay(100);
+                intake.move(0);
+                pros::delay(500);
+            }
 		} else {
 			intake.move(0);
 		}
