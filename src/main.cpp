@@ -12,15 +12,11 @@ pros::MotorGroup rightMotors({-14, -13, -12}, pros::MotorGearset::blue); // righ
 
 pros::adi::DigitalOut mogo('B');
 pros::MotorGroup intake({19});
-pros::MotorGroup wallStake();
-pros::MotorGroup otherWallStake();
-
-//racism
-pros::Optical color(0);
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// @todo Parameters to tune
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
 pros::Rotation horizontalEnc(1);
@@ -83,6 +79,7 @@ lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
                                   10, // minimum output where drivetrain will move out of 127
                                   1.019 // expo curve gain
 );
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // create the chassis
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
@@ -130,18 +127,18 @@ void disabled() {}
  */
 void competition_initialize() {}
 
-// get a path used for pure pursuit
-// this needs to be put outside a function
-ASSET(example_txt); // '.' replaced with "_" to make c++ happy
+// // get a path used for pure pursuit
+// // this needs to be put outside a function
+// ASSET(example_txt); // '.' replaced with "_" to make c++ happy
 
 /**
  * Runs during auto
  *
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
+ * Autonomous implementation not shown, will be shown later in notebook
  */
 void autonomous() {
-    chassis.setPose(0, 0, 0);
-    chassis.moveToPose(0, 20, 0, 4000);
+
 }
 
 /**
@@ -151,29 +148,24 @@ void opcontrol() {
     // autonomous();
     // controller
     // loop to continuously update motors
-	bool is_intake_on = false;
+	bool is_mogo_on = false;
     while (true) {
         // get joystick positions
         int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = Master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        
         // move the chassis with curvature drive
         chassis.arcade(leftY, rightX);
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(-127);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
-            if (color.get_hue() >= 200.0 && color.get_hue() <= 220.0) {
-                pros::delay(100);
-                intake.move(0);
-                pros::delay(500);
-            }
 		} else {
 			intake.move(0);
 		}
-        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
-			is_intake_on = !is_intake_on;
-		}
-		mogo.set_value(is_intake_on);
+        
+        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) is_mogo_on = !is_mogo_on;
+		mogo.set_value(is_mogo_on);
         // delay to save resources
         pros::delay(10);
     }
