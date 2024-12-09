@@ -1,6 +1,7 @@
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/chassis.hpp"
+#include "pros/optical.hpp"
 
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
@@ -16,6 +17,9 @@ pros::MotorGroup intake({1, -2});
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
+
+//color sensor
+pros::Optical ringSense();
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
@@ -148,6 +152,7 @@ void opcontrol() {
     // controller
     // loop to continuously update motors
 	bool is_intake_on = false;
+    bool ejectRed = false;
     while (true) {
         // get joystick positions
         int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
