@@ -13,7 +13,7 @@ pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right moto
 
 pros::adi::DigitalOut mogo('A');
 pros::adi::DigitalOut mogo2('B');
-pros::MotorGroup intake({1, -2});
+pros::MotorGroup intake({1});
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
@@ -163,6 +163,17 @@ void opcontrol() {
 			intake.move(-127);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
+            if (ringSense().get_hue() >= 200.0 && ringSense().get_hue() <= 220.0 && ejectRed == false) {                
+                pros::delay(250);
+				intake.move(0);
+				pros::delay(10);
+				intake.move(127);
+            } else if (ringSense().get_hue() >= 10.0 && ringSense().get_hue() <= 20.0 && ejectRed) {                
+                pros::delay(250);
+				intake.move(0);
+				pros::delay(10);
+				intake.move(127);            
+            }
 		} else {
 			intake.move(0);
 		}
