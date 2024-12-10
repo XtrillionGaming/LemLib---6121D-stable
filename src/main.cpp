@@ -8,15 +8,18 @@
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
 // motor groups
-pros::MotorGroup leftMotors({-10, 17, -18},
+pros::MotorGroup leftMotors({-20, -10, -9},
                             pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
-pros::MotorGroup rightMotors({-14, -13, -12}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
+pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
 pros::adi::DigitalOut mogo('B');
 pros::MotorGroup intake({19});
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
+
+//color sensor
+pros::Optical ringSense();
 
 // Runs the intake in
 static void run_intake(int speed) {
@@ -58,7 +61,7 @@ static void mogo_unclamp() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// @todo Parameters to tune
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation horizontalEnc(1);
+pros::Rotation horizontalEnc(12);
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
 pros::Rotation verticalEnc(20);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
@@ -72,7 +75,7 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               17.5, // 10 inch track width
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
                               450, // drivetrain rpm is 360
-                              8 // horizontal drift is 2. If we had traction wheels, it would have been 8
+                              2 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 
 // lateral motion controller
@@ -206,6 +209,6 @@ void opcontrol() {
         if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) is_mogo_on = !is_mogo_on;
 		mogo.set_value(is_mogo_on);
         // delay to save resources
-        pros::delay(10);
+        pros::delay(10);    
     }
 }
