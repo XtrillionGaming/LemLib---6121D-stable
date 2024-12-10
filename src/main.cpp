@@ -1,8 +1,9 @@
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/chassis.hpp"
-
-#define INTAKE_SPEED -127
+#include "pros/motor_group.hpp"
+#include "pros/optical.hpp"
+#include "pros/rtos.hpp"
 
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
@@ -12,8 +13,10 @@ pros::MotorGroup leftMotors({-20, -10, -9},
                             pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
 pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
-pros::adi::DigitalOut mogo('B');
-pros::MotorGroup intake({19});
+pros::adi::DigitalOut mogo('A');
+pros::adi::DigitalOut mogo2('B');
+pros::MotorGroup intake({1});
+pros::MotorGroup wall({8});
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
@@ -21,44 +24,6 @@ pros::Imu imu(10);
 //color sensor
 pros::Optical ringSense();
 
-// Runs the intake in
-static void run_intake(int speed) {
-    intake.move(INTAKE_SPEED);
-}
-
-// Runs the intake out
-static void run_outtake(int speed) {
-    intake.move(-INTAKE_SPEED);
-}
-
-// Stops the intake
-static void halt_intake() {
-    intake.move(0);
-}
-
-// Completely halts the drivetrain at the moment its called. Will halt all code for 1 second
-static void hard_break_drivetrain() {
-    leftMotors.set_brake_mode(MOTOR_BRAKE_HOLD);
-    rightMotors.set_brake_mode(MOTOR_BRAKE_HOLD);
-    chassis.cancelAllMotions();
-    leftMotors.move(0);
-    rightMotors.move(0);
-    pros::delay(100);
-    leftMotors.set_brake_mode(MOTOR_BRAKE_COAST);
-    rightMotors.set_brake_mode(MOTOR_BRAKE_COAST);
-}
-
-// Clamps the mogo
-static void mogo_clamp() {
-    mogo.set_value(1);
-}
-
-// Unclamps the mogo
-static void mogo_unclamp() {
-    mogo.set_value(0);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// @todo Parameters to tune
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
 pros::Rotation horizontalEnc(12);
@@ -121,7 +86,6 @@ lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
                                   10, // minimum output where drivetrain will move out of 127
                                   1.019 // expo curve gain
 );
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // create the chassis
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
@@ -169,18 +133,18 @@ void disabled() {}
  */
 void competition_initialize() {}
 
-// // get a path used for pure pursuit
-// // this needs to be put outside a function
-// ASSET(example_txt); // '.' replaced with "_" to make c++ happy
+// get a path used for pure pursuit
+// this needs to be put outside a function
+ASSET(example_txt); // '.' replaced with "_" to make c++ happy
 
 /**
  * Runs during auto
  *
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
- * Autonomous implementation not shown, will be shown later in notebook
  */
 void autonomous() {
-
+    chassis.setPose(0, 0, 0);
+    chassis.follow(BasePlan_txt, 5, 2000);
 }
 
 /**
@@ -190,24 +154,52 @@ void opcontrol() {
     // autonomous();
     // controller
     // loop to continuously update motors
-	bool is_mogo_on = false;
+	bool is_intake_on = false;
+    bool ejectRed = false;
+    bool wallScore = true;
+    wall.move(50);
+    pros::delay(100);
+    wall.move(0);
     while (true) {
         // get joystick positions
         int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = Master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-        
         // move the chassis with curvature drive
         chassis.arcade(leftY, rightX);
+        if(wallScore && Master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+            wall.move(-50);
+            pros::delay(100);
+            wall.move(0);
+            wallScore = false;
+        } else if (wallScore == false && Master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+            wall.move(50);
+            pros::delay(100);
+            wall.move(0);
+            wallScore = true;
+        }
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(-127);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
+            if (ringSense().get_hue() >= 200.0 && ringSense().get_hue() <= 220.0 && ejectRed == false) {                
+                pros::delay(250);
+				intake.move(0);
+				pros::delay(10);
+				intake.move(127);
+            } else if (ringSense().get_hue() >= 10.0 && ringSense().get_hue() <= 20.0 && ejectRed) {                
+                pros::delay(250);
+				intake.move(0);
+				pros::delay(10);
+				intake.move(127);            
+            }
 		} else {
 			intake.move(0);
 		}
-        
-        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) is_mogo_on = !is_mogo_on;
-		mogo.set_value(is_mogo_on);
+        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
+			is_intake_on = !is_intake_on;
+		}
+		mogo.set_value(is_intake_on);
+        mogo2.set_value(is_intake_on);  
         // delay to save resources
         pros::delay(10);    
     }
