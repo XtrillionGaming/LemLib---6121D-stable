@@ -2,6 +2,8 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/chassis.hpp"
 
+#define INTAKE_SPEED -127
+
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
@@ -15,6 +17,43 @@ pros::MotorGroup intake({19});
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
+
+// Runs the intake in
+static void run_intake(int speed) {
+    intake.move(INTAKE_SPEED);
+}
+
+// Runs the intake out
+static void run_outtake(int speed) {
+    intake.move(-INTAKE_SPEED);
+}
+
+// Stops the intake
+static void halt_intake() {
+    intake.move(0);
+}
+
+// Completely halts the drivetrain at the moment its called. Will halt all code for 1 second
+static void hard_break_drivetrain() {
+    leftMotors.set_brake_mode(MOTOR_BRAKE_HOLD);
+    rightMotors.set_brake_mode(MOTOR_BRAKE_HOLD);
+    chassis.cancelAllMotions();
+    leftMotors.move(0);
+    rightMotors.move(0);
+    pros::delay(100);
+    leftMotors.set_brake_mode(MOTOR_BRAKE_COAST);
+    rightMotors.set_brake_mode(MOTOR_BRAKE_COAST);
+}
+
+// Clamps the mogo
+static void mogo_clamp() {
+    mogo.set_value(1);
+}
+
+// Unclamps the mogo
+static void mogo_unclamp() {
+    mogo.set_value(0);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// @todo Parameters to tune
 // tracking wheels
