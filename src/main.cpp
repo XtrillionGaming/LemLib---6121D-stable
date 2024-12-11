@@ -183,12 +183,12 @@ void opcontrol() {
 			intake.move(127);
             if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {
                 if(iter%25 == 0) {
-				intake.move(0);
+				    intake.move(0);
                 }
 				intake.move(127);
             } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {
                 if(iter%25 == 0) {
-				intake.move(0);
+				    intake.move(0);
                 }
 				intake.move(127);            
             }
