@@ -9,8 +9,7 @@
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
 // motor groups
-pros::MotorGroup leftMotors({-20, -10, -9},
-                            pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
+pros::MotorGroup leftMotors({-20, -10, -9}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
 pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
 pros::adi::DigitalOut mogo('A');
@@ -22,7 +21,7 @@ pros::MotorGroup wall({8});
 pros::Imu imu(10);
 
 //color sensor
-pros::Optical ringSense();
+pros::Optical ringSense(69);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
@@ -143,8 +142,8 @@ ASSET(example_txt); // '.' replaced with "_" to make c++ happy
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    chassis.setPose(0, 0, 0);
-    chassis.follow(BasePlan_txt, 5, 2000);
+    // chassis.setPose(0, 0, 0);
+    // chassis.follow(BasePlan_txt, 5, 2000);
 }
 
 /**
@@ -181,12 +180,12 @@ void opcontrol() {
 			intake.move(-127);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
-            if (ringSense().get_hue() >= 200.0 && ringSense().get_hue() <= 220.0 && ejectRed == false) {                
+            if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {                
                 pros::delay(250);
 				intake.move(0);
 				pros::delay(10);
 				intake.move(127);
-            } else if (ringSense().get_hue() >= 10.0 && ringSense().get_hue() <= 20.0 && ejectRed) {                
+            } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {                
                 pros::delay(250);
 				intake.move(0);
 				pros::delay(10);
