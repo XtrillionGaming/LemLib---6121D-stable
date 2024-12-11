@@ -1,5 +1,6 @@
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "lemlib/asset.hpp"
 #include "lemlib/chassis/chassis.hpp"
 #include "pros/motor_group.hpp"
 #include "pros/optical.hpp"
@@ -27,12 +28,8 @@ pros::Optical ringSense();
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
 pros::Rotation horizontalEnc(12);
-// vertical tracking wheel encoder. Rotation sensor, port 11, reversed
-pros::Rotation verticalEnc(20);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -15);
-// vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
@@ -68,7 +65,7 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
+lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
@@ -135,7 +132,10 @@ void competition_initialize() {}
 
 // get a path used for pure pursuit
 // this needs to be put outside a function
-ASSET(example_txt); // '.' replaced with "_" to make c++ happy
+ASSET(AllianceCarry_txt); // '.' replaced with "_" to make c++ happy
+ASSET(BasePlan_txt);
+ASSET(OppsRBadP_txt);
+ASSET(skills_txt);
 
 /**
  * Runs during auto
@@ -144,8 +144,12 @@ ASSET(example_txt); // '.' replaced with "_" to make c++ happy
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-    chassis.follow(BasePlan_txt, 5, 2000);
+    wall.move(50);
+    pros::delay(100);
+    wall.move(0);
+    chassis.follow(AllianceCarry_txt, 5, 2000);
 }
+bool wallScore = true;
 
 /**
  * Runs in driver control
@@ -156,10 +160,6 @@ void opcontrol() {
     // loop to continuously update motors
 	bool is_intake_on = false;
     bool ejectRed = false;
-    bool wallScore = true;
-    wall.move(50);
-    pros::delay(100);
-    wall.move(0);
     while (true) {
         // get joystick positions
         int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);

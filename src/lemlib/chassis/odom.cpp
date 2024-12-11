@@ -17,11 +17,9 @@ pros::Task* trackingTask = nullptr;
 
 // global variables
 pros::Imu imu(15);
-pros::Rotation vertical_encoder(20);
 pros::Rotation horizontal_encoder(1);
 lemlib::TrackingWheel horizontal(&horizontal_encoder, lemlib::Omniwheel::NEW_275, -5);
-lemlib::TrackingWheel vertical(&vertical_encoder, lemlib::Omniwheel::NEW_275, 0);
-lemlib::OdomSensors odomSensors(&vertical, nullptr, &horizontal, nullptr, &imu); // the sensors to be used for odometry
+lemlib::OdomSensors odomSensors(nullptr, nullptr, &horizontal, nullptr, &imu); // the sensors to be used for odometry
 lemlib::Drivetrain drive(nullptr, nullptr, 0, 0, 0, 0); // the drivetrain to be used for odometry
 lemlib::Pose odomPose(0, 0, 0); // the pose of the robot
 lemlib::Pose odomSpeed(0, 0, 0); // the speed of the robot
