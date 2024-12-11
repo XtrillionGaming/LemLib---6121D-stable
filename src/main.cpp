@@ -159,6 +159,7 @@ void opcontrol() {
     // loop to continuously update motors
 	bool is_intake_on = false;
     bool ejectRed = false;
+    unsigned long long iter = 0;
     while (true) {
         // get joystick positions
         int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -180,15 +181,15 @@ void opcontrol() {
 			intake.move(-127);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
-            if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {                
-                pros::delay(250);
+            if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {
+                if(iter%25 == 0) {
 				intake.move(0);
-				pros::delay(10);
+                }
 				intake.move(127);
-            } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {                
-                pros::delay(250);
+            } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {
+                if(iter%25 == 0) {
 				intake.move(0);
-				pros::delay(10);
+                }
 				intake.move(127);            
             }
 		} else {
@@ -201,5 +202,6 @@ void opcontrol() {
         mogo2.set_value(is_intake_on);  
         // delay to save resources
         pros::delay(10);    
+        iter ++;
     }
 }
