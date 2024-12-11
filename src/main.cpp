@@ -88,22 +88,10 @@ lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
 // create the chassis
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
+bool ejectRed = false;
 // Runs the intake in
 static void run_intake(int speed) {
-    bool ejectRed = false;
-    unsigned long long iter = 0;
     intake.move(INTAKE_SPEED);
-    if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {
-        if(iter%25 == 0) {
-			intake.move(0);
-        }
-		intake.move(127);
-    } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {
-        if(iter%25 == 0) {
-			intake.move(0);
-        }
-		intake.move(127);            
-    }
 }
 
 // Runs the intake out
@@ -195,11 +183,18 @@ ASSET(skills_txt);
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
+    // Allaince Carry Rough Draft
     chassis.setPose(0, 0, 0);
-    wall.move(50);
-    pros::delay(100);
-    wall.move(0);
-    chassis.follow(AllianceCarry_txt, 5, 2000);
+    chassis.moveToPoint(33.925, -17.299, 5000);
+    chassis.moveToPoint(34.15, 6.965, 5000);
+    chassis.moveToPoint(47.405, 8.313, 5000);
+    chassis.moveToPoint(41.788, -22.242, 5000);
+    chassis.moveToPoint(47.405, -46.731, 5000);
+    chassis.moveToPoint(33.925, -64.704, 5000);
+    chassis.moveToPoint(17.749, -84.25, 5000);
+    chassis.moveToPoint(33.925, -88.294, 5000);
+    chassis.moveToPoint(45.608, -61.11, 5000);
+
 }
 bool wallScore = true;
 
@@ -211,7 +206,6 @@ void opcontrol() {
     // controller
     // loop to continuously update motors
 	bool is_intake_on = false;
-    bool ejectRed = false;
     unsigned long long iter = 0;
     while (true) {
         // get joystick positions
@@ -234,23 +228,32 @@ void opcontrol() {
 			intake.move(-127);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
-            if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {
-                if(iter%25 == 0) {
-				    intake.move(0);
-                }
-				intake.move(127);
-            } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {
-                if(iter%25 == 0) {
-				    intake.move(0);
-                }
-				intake.move(127);            
-            }
+            // if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {
+            //     if(iter%25 == 0) {
+			// 	    intake.move(0);
+            //     }
+			// 	intake.move(127);
+            // } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {
+            //     if(iter%25 == 0) {
+			// 	    intake.move(0);
+            //     }
+			// 	intake.move(127);            
+            // }
 		} else {
 			intake.move(0);
 		}
         if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
 			is_intake_on = !is_intake_on;
 		}
+        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
+            if (!ejectRed) {
+                ejectRed = 1;
+                Master.print(0, 0, "Now sorting red rings");
+            } else {
+                ejectRed = 0;
+                Master.print(0, 0, "Now sorting blue rings");
+            }
+        }
 		mogo.set_value(is_intake_on);
         mogo2.set_value(is_intake_on);  
         // delay to save resources
