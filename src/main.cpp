@@ -178,6 +178,10 @@ ASSET(OppsRBadP_txt);
 ASSET(skills_txt);
 ASSET(betterAllianceCarryRed_txt);
 ASSET(betterAllianceCarryBlue_txt);
+ASSET(blueLeft_txt);
+ASSET(blueRight_txt);
+ASSET(redRight_txt);
+ASSET(redLeft_txt);
 
 /**
  * Runs during auto
@@ -185,17 +189,18 @@ ASSET(betterAllianceCarryBlue_txt);
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    // Allaince Carry Rough Draft
+    // // Allaince Carry Rough Draft
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(33.925, -17.299, 5000);
-    chassis.moveToPoint(34.15, 6.965, 5000);
-    chassis.moveToPoint(47.405, 8.313, 5000);
-    chassis.moveToPoint(41.788, -22.242, 5000);
-    chassis.moveToPoint(47.405, -46.731, 5000);
-    chassis.moveToPoint(33.925, -64.704, 5000);
-    chassis.moveToPoint(17.749, -84.25, 5000);
-    chassis.moveToPoint(33.925, -88.294, 5000);
-    chassis.moveToPoint(45.608, -61.11, 5000);
+    // chassis.moveToPoint(33.925, -17.299, 5000);
+    // chassis.moveToPoint(34.15, 6.965, 5000);
+    // chassis.moveToPoint(47.405, 8.313, 5000);
+    // chassis.moveToPoint(41.788, -22.242, 5000);
+    // chassis.moveToPoint(47.405, -46.731, 5000);
+    // chassis.moveToPoint(33.925, -64.704, 5000);
+    // chassis.moveToPoint(17.749, -84.25, 5000);
+    // chassis.moveToPoint(33.925, -88.294, 5000);
+    // chassis.moveToPoint(45.608, -61.11, 5000);
+    chassis.follow(betterAllianceCarryRed_txt, 5, 2000);
 
 }
 bool wallScore = true;
