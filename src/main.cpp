@@ -176,7 +176,8 @@ ASSET(AllianceCarry_txt); // '.' replaced with "_" to make c++ happy
 ASSET(BasePlan_txt);
 ASSET(OppsRBadP_txt);
 ASSET(skills_txt);
-ASSET(betterAllianceCarry_txt);
+ASSET(betterAllianceCarryRed_txt);
+ASSET(betterAllianceCarryBlue_txt);
 
 /**
  * Runs during auto
