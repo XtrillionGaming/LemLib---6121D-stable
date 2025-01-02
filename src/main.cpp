@@ -17,7 +17,7 @@ pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right moto
 
 pros::adi::DigitalOut mogo('A');
 pros::adi::DigitalOut mogo2('B');
-pros::MotorGroup intake({1});
+pros::MotorGroup intake({1}, {69});
 pros::MotorGroup wall({8});
 
 // Inertial Sensor on port 10
@@ -184,18 +184,7 @@ ASSET(betterAllianceCarry_txt);
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    // Allaince Carry Rough Draft
-    chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(33.925, -17.299, 5000);
-    chassis.moveToPoint(34.15, 6.965, 5000);
-    chassis.moveToPoint(47.405, 8.313, 5000);
-    chassis.moveToPoint(41.788, -22.242, 5000);
-    chassis.moveToPoint(47.405, -46.731, 5000);
-    chassis.moveToPoint(33.925, -64.704, 5000);
-    chassis.moveToPoint(17.749, -84.25, 5000);
-    chassis.moveToPoint(33.925, -88.294, 5000);
-    chassis.moveToPoint(45.608, -61.11, 5000);
-
+    
 }
 bool wallScore = true;
 
