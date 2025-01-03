@@ -6,23 +6,12 @@
 #include "pros/optical.hpp"
 #include "pros/rtos.hpp"
 #include "lemlib/pid.hpp"
+#include "autons/red_side.h"
+#include "autons/common_definitions.h"
 
-#define INTAKE_SPEED -127
 
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
-
-// motor groups
-pros::MotorGroup leftMotors({-8, -14, -10}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
-pros::MotorGroup rightMotors({19, 9, 20}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
-
-pros::adi::DigitalOut mogo('H');
-pros::MotorGroup intake({18, -6});
-pros::MotorGroup wall({-16});
-lemlib::PID wallstakePID(1.5, 0, 0, 10, 0);
-
-// Inertial Sensor on port 10
-pros::Imu imu(15);
 
 //color sensor
 pros::Optical ringSense(69);
@@ -33,9 +22,9 @@ pros::Rotation horizontalEnc(17);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -3.5);
 // vertical tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation verticalEnc(7);
+pros::Rotation verticalEnc(12);
 // vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -0.25);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
@@ -47,15 +36,15 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(10, // proportional gain (kP)
-                                            0, // integral gain (kI)
-                                            3, // derivative gain (kD)
-                                            3, // anti windup
-                                            1, // small error range, in inches
-                                            100, // small error range timeout, in milliseconds
-                                            3, // large error range, in inches
-                                            500, // large error range timeout, in milliseconds
-                                            20 // maximum acceleration (slew)
+lemlib::ControllerSettings linearController (10, // proportional gain (kP)
+                                             0, // integral gain (kI)
+                                             3, // derivative gain (kD)
+                                             3, // anti windup
+                                             1, // small error range, in inches
+                                             100, // small error range timeout, in milliseconds
+                                             3, // large error range, in inches
+                                             500, // large error range timeout, in milliseconds
+                                             20 // maximum acceleration (slew)
 );
 
 // angular motion controller
@@ -94,43 +83,6 @@ lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
 bool ejectRed = false;
-// Runs the intake in
-static void run_intake(int speed) {
-    intake.move(INTAKE_SPEED);
-}
-
-// Runs the intake out
-static void run_outtake(int speed) {
-    intake.move(-INTAKE_SPEED);
-}
-
-// Stops the intake
-static void halt_intake() {
-    intake.move(0);
-}
-
-// Completely halts the drivetrain at the moment its called. Will halt all code for 1 second
-static void hard_break_drivetrain() {
-    leftMotors.set_brake_mode(MOTOR_BRAKE_HOLD);
-    rightMotors.set_brake_mode(MOTOR_BRAKE_HOLD);
-    chassis.cancelAllMotions();
-    leftMotors.move(0);
-    rightMotors.move(0);
-    pros::delay(100);
-    leftMotors.set_brake_mode(MOTOR_BRAKE_COAST);
-    rightMotors.set_brake_mode(MOTOR_BRAKE_COAST);
-}
-
-// Clamps the mogo
-static void mogo_clamp() {
-    mogo.set_value(1);
-}
-
-// Unclamps the mogo
-static void mogo_unclamp() {
-    mogo.set_value(0);
-}
-
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -177,16 +129,16 @@ void competition_initialize() {}
 
 // get a path used for pure pursuit
 // this needs to be put outside a function
-ASSET(AllianceCarry_txt); // '.' replaced with "_" to make c++ happy
-ASSET(BasePlan_txt);
-ASSET(OppsRBadP_txt);
-ASSET(skills_txt);
-ASSET(betterAllianceCarryRed_txt);
-ASSET(betterAllianceCarryBlue_txt);
-ASSET(blueLeft_txt);
-ASSET(blueRight_txt);
-ASSET(redRight_txt);
-ASSET(redLeft_txt);
+// ASSET(AllianceCarry_txt); // '.' replaced with "_" to make c++ happy
+// ASSET(BasePlan_txt);
+// ASSET(OppsRBadP_txt);
+// ASSET(skills_txt);
+// ASSET(betterAllianceCarryRed_txt);
+// ASSET(betterAllianceCarryBlue_txt);
+// ASSET(blueLeft_txt);
+// ASSET(blueRight_txt);
+// ASSET(redRight_txt);
+// ASSET(redLeft_txt);
 
 /**
  * Runs during auto
@@ -196,15 +148,17 @@ ASSET(redLeft_txt);
 void autonomous() {
     // Allaince Carry Rough Draft
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(33.925, -17.299, 5000);
-    chassis.moveToPoint(34.15, 6.965, 5000);
-    chassis.moveToPoint(47.405, 8.313, 5000);
-    chassis.moveToPoint(41.788, -22.242, 5000);
-    chassis.moveToPoint(47.405, -46.731, 5000);
-    chassis.moveToPoint(33.925, -64.704, 5000);
-    chassis.moveToPoint(17.749, -84.25, 5000);
-    chassis.moveToPoint(33.925, -88.294, 5000);
-    chassis.moveToPoint(45.608, -61.11, 5000);
+    // chassis.moveToPoint(33.925, -17.299, 5000);
+    // chassis.moveToPoint(34.15, 6.965, 5000);
+    // chassis.moveToPoint(47.405, 8.313, 5000);
+    // chassis.moveToPoint(41.788, -22.242, 5000);
+    // chassis.moveToPoint(47.405, -46.731, 5000);
+    // chassis.moveToPoint(33.925, -64.704, 5000);
+    // chassis.moveToPoint(17.749, -84.25, 5000);
+    // chassis.moveToPoint(33.925, -88.294, 5000);
+    // chassis.moveToPoint(45.608, -61.11, 5000);
+
+    Left::FourRingOneStakeLadderAuton(chassis);
 
 }
 bool wallScore = true;
@@ -213,42 +167,42 @@ bool wallScore = true;
  * Runs in driver control
  */
 void opcontrol() {
-    // autonomous();
     // controller
+    autonomous();
     // loop to continuously update motors
 	bool is_intake_on = false;
     unsigned long long iter = 0;
     int goal_wallstake_angle = 0;
-	wallstake.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
+	wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
     while (true) {
         // get joystick positions
-        int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = Master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+        int rightX = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
         // move the chassis with curvature drive
         chassis.arcade(leftY, rightX);
 
-        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(-127);
-		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(127);
 		} else {
 			intake.move(0);
 		}
-        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
+        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
 			is_intake_on = !is_intake_on;
 		}
 
-        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 			goal_wallstake_angle = 0;
-		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
 			goal_wallstake_angle = 65;
-		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 			goal_wallstake_angle = 400;
 		}
 
 		// set PID for wallstake
 		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - wall.get_position(0));
-		wallstake.move(wallstake_pid_output);
+		wall.move(wallstake_pid_output);
 
 		mogo.set_value(is_intake_on);
         // delay to save resources
