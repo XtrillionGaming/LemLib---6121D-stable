@@ -5,6 +5,7 @@
 #include "pros/motor_group.hpp"
 #include "pros/optical.hpp"
 #include "pros/rtos.hpp"
+#include "lemlib/pid.hpp"
 
 #define INTAKE_SPEED -127
 
@@ -12,30 +13,34 @@
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
 // motor groups
-pros::MotorGroup leftMotors({-20, -10, -9}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
-pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
+pros::MotorGroup leftMotors({-8, -14, -10}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
+pros::MotorGroup rightMotors({19, 9, 20}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
-pros::adi::DigitalOut mogo('A');
-pros::adi::DigitalOut mogo2('B');
-pros::MotorGroup intake({1}, {69});
-pros::MotorGroup wall({8});
+pros::adi::DigitalOut mogo('H');
+pros::MotorGroup intake({18, -6});
+pros::MotorGroup wall({-16});
+lemlib::PID wallstakePID(1.5, 0, 0, 10, 0);
 
 // Inertial Sensor on port 10
-pros::Imu imu(10);
+pros::Imu imu(15);
 
 //color sensor
 pros::Optical ringSense(69);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation horizontalEnc(12);
+pros::Rotation horizontalEnc(17);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -15);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -3.5);
+// vertical tracking wheel encoder. Rotation sensor, port 20, not reversed
+pros::Rotation verticalEnc(7);
+// vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               &rightMotors, // right motor group
-                              17.5, // 10 inch track width
+                              15, // 10 inch track width
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
                               450, // drivetrain rpm is 360
                               2 // horizontal drift is 2. If we had traction wheels, it would have been 8
@@ -66,7 +71,7 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
+lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
@@ -213,57 +218,41 @@ void opcontrol() {
     // loop to continuously update motors
 	bool is_intake_on = false;
     unsigned long long iter = 0;
+    int goal_wallstake_angle = 0;
+	wallstake.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
     while (true) {
         // get joystick positions
         int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = Master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
         // move the chassis with curvature drive
         chassis.arcade(leftY, rightX);
-        if(wallScore && Master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-            wall.move(-50);
-            pros::delay(100);
-            wall.move(0);
-            wallScore = false;
-        } else if (wallScore == false && Master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-            wall.move(50);
-            pros::delay(100);
-            wall.move(0);
-            wallScore = true;
-        }
+
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(-127);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
-            // if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {
-            //     if(iter%25 == 0) {
-			// 	    intake.move(0);
-            //     }
-			// 	intake.move(127);
-            // } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {
-            //     if(iter%25 == 0) {
-			// 	    intake.move(0);
-            //     }
-			// 	intake.move(127);            
-            // }
 		} else {
 			intake.move(0);
 		}
         if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
 			is_intake_on = !is_intake_on;
 		}
-        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
-            if (!ejectRed) {
-                ejectRed = 1;
-                Master.print(0, 0, "Now sorting red rings");
-            } else {
-                ejectRed = 0;
-                Master.print(0, 0, "Now sorting blue rings");
-            }
-        }
+
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+			goal_wallstake_angle = 0;
+		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+			goal_wallstake_angle = 65;
+		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+			goal_wallstake_angle = 400;
+		}
+
+		// set PID for wallstake
+		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - wall.get_position(0));
+		wallstake.move(wallstake_pid_output);
+
 		mogo.set_value(is_intake_on);
-        mogo2.set_value(is_intake_on);  
         // delay to save resources
         pros::delay(10);    
-        iter ++;
+        iter++;
     }
 }
