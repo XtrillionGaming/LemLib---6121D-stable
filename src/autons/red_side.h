@@ -12,9 +12,10 @@ namespace Right {
         chassis.moveToPose(0, -41, 0, 1500, {.forwards = false}, false);
         mogo_clamp();
         pros::delay(500);
-        run_intake(-127);
         chassis.turnToPoint(-28.17, -40.09, 1000);
         chassis.moveToPoint(-28.17, -40.09, 1000);
+        chassis.waitUntilDone();
+        run_intake(-127);
         chassis.turnToHeading(180, 750);
         chassis.moveToPoint(16, -41.74, 1000);
         chassis.waitUntilDone();

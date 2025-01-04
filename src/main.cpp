@@ -138,7 +138,7 @@ void competition_initialize() {}
 // ASSET(betterAllianceCarryBlue_txt);
 // ASSET(blueLeft_txt);
 // ASSET(blueRight_txt);
-// ASSET(redRight_txt);// ASSET(redLeft_txt);
+// ASSET(redRight_txt);// ASSET(redLeft_t`xt);
 
 /**
  * Runs during auto
@@ -147,7 +147,7 @@ void competition_initialize() {}
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-    Red::Right::TwoRingOneStakeLadderAuton(chassis);
+    skills::auton_skills(chassis);
 }
 bool wallScore = true;
 
@@ -156,7 +156,7 @@ bool wallScore = true;
  */
 void opcontrol() {
     // controller
-    // autonomous();
+    //autonomous();
     // loop to continuously update motors
 	bool is_intake_on = false;
     unsigned long long iter = 0;
