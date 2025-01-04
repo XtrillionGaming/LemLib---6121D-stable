@@ -12,8 +12,8 @@
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
 // motor groups
-pros::MotorGroup leftMotors({-20, -10, -9}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
-pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
+pros::MotorGroup leftMotors({-8, -9, -10}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
+pros::MotorGroup rightMotors({1, 2, 3}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
 pros::adi::DigitalOut mogo('A');
 pros::adi::DigitalOut mogo2('B');
@@ -21,14 +21,14 @@ pros::MotorGroup intake({1});
 pros::MotorGroup wall({8});
 
 // Inertial Sensor on port 10
-pros::Imu imu(10);
+pros::Imu imu(4);
 
 //color sensor
 pros::Optical ringSense(69);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation horizontalEnc(12);
+pros::Rotation horizontalEnc(6);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -15);
 
