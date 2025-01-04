@@ -6,6 +6,7 @@
 
 namespace skills {
     static void auton_skills(lemlib::Chassis& chassis) {
+        //place bot up againts alliance stake
         intake.move(-127);
         pros::delay(1000);
         chassis.moveToPoint(0, 0,  5000);
