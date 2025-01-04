@@ -4,6 +4,8 @@
 #include "lemlib/api.hpp"
 #include "common_definitions.h"
 
+namespace Red {
+
 namespace Right {
     // align to closest mobile goal right up against the wall (4 points)
     static void TwoRingOneStakeLadderAuton(lemlib::Chassis& chassis) {
@@ -40,4 +42,6 @@ namespace Left {
         halt_intake();
         mogo_unclamp();
     }
+};
+
 };

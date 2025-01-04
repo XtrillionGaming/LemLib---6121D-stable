@@ -7,6 +7,7 @@
 #include "pros/rtos.hpp"
 #include "lemlib/pid.hpp"
 #include "autons/red_side.h"
+#include "autons/blue_side.h"
 #include "autons/common_definitions.h"
 
 
@@ -105,7 +106,7 @@ void initialize() {
     // thread to for brain screen and position logging
     pros::Task screenTask([&]() {
         while (true) {
-            // print robot location to the brain screen
+            // print robot location to the abrain screen
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
@@ -137,8 +138,7 @@ void competition_initialize() {}
 // ASSET(betterAllianceCarryBlue_txt);
 // ASSET(blueLeft_txt);
 // ASSET(blueRight_txt);
-// ASSET(redRight_txt);
-// ASSET(redLeft_txt);
+// ASSET(redRight_txt);// ASSET(redLeft_txt);
 
 /**
  * Runs during auto
@@ -146,20 +146,8 @@ void competition_initialize() {}
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    // Allaince Carry Rough Draft
     chassis.setPose(0, 0, 0);
-    // chassis.moveToPoint(33.925, -17.299, 5000);
-    // chassis.moveToPoint(34.15, 6.965, 5000);
-    // chassis.moveToPoint(47.405, 8.313, 5000);
-    // chassis.moveToPoint(41.788, -22.242, 5000);
-    // chassis.moveToPoint(47.405, -46.731, 5000);
-    // chassis.moveToPoint(33.925, -64.704, 5000);
-    // chassis.moveToPoint(17.749, -84.25, 5000);
-    // chassis.moveToPoint(33.925, -88.294, 5000);
-    // chassis.moveToPoint(45.608, -61.11, 5000);
-
-    Left::FourRingOneStakeLadderAuton(chassis);
-
+    Red::Right::TwoRingOneStakeLadderAuton(chassis);
 }
 bool wallScore = true;
 
@@ -168,7 +156,7 @@ bool wallScore = true;
  */
 void opcontrol() {
     // controller
-    autonomous();
+    // autonomous();
     // loop to continuously update motors
 	bool is_intake_on = false;
     unsigned long long iter = 0;
