@@ -5,47 +5,52 @@
 #include "pros/motor_group.hpp"
 #include "pros/optical.hpp"
 #include "pros/rtos.hpp"
-#include "lemlib/pid.hpp"
-#include "autons/red_side.h"
-#include "autons/blue_side.h"
-#include "autons/common_definitions.h"
 
+#define INTAKE_SPEED -127
 
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
+
+// motor groups
+pros::MotorGroup leftMotors({-8, -9, -10}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
+pros::MotorGroup rightMotors({1, 2, 3}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
+
+pros::adi::DigitalOut mogo('A');
+pros::adi::DigitalOut mogo2('B');
+pros::MotorGroup intake({1});
+pros::MotorGroup wall({8});
+
+// Inertial Sensor on port 10
+pros::Imu imu(4);
 
 //color sensor
 pros::Optical ringSense(69);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation horizontalEnc(17);
+pros::Rotation horizontalEnc(6);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -3.5);
-// vertical tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation verticalEnc(12);
-// vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -0.25);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -15);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               &rightMotors, // right motor group
-                              15, // 10 inch track width
+                              17.5, // 10 inch track width
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
                               450, // drivetrain rpm is 360
                               2 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController (10, // proportional gain (kP)
-                                             0, // integral gain (kI)
-                                             3, // derivative gain (kD)
-                                             3, // anti windup
-                                             1, // small error range, in inches
-                                             100, // small error range timeout, in milliseconds
-                                             3, // large error range, in inches
-                                             500, // large error range timeout, in milliseconds
-                                             20 // maximum acceleration (slew)
+lemlib::ControllerSettings linearController(10, // proportional gain (kP)
+                                            0, // integral gain (kI)
+                                            3, // derivative gain (kD)
+                                            3, // anti windup
+                                            1, // small error range, in inches
+                                            100, // small error range timeout, in milliseconds
+                                            3, // large error range, in inches
+                                            500, // large error range timeout, in milliseconds
+                                            20 // maximum acceleration (slew)
 );
 
 // angular motion controller
@@ -61,7 +66,7 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
+lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
@@ -84,6 +89,43 @@ lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
 bool ejectRed = false;
+// Runs the intake in
+static void run_intake(int speed) {
+    intake.move(INTAKE_SPEED);
+}
+
+// Runs the intake out
+static void run_outtake(int speed) {
+    intake.move(-INTAKE_SPEED);
+}
+
+// Stops the intake
+static void halt_intake() {
+    intake.move(0);
+}
+
+// Completely halts the drivetrain at the moment its called. Will halt all code for 1 second
+static void hard_break_drivetrain() {
+    leftMotors.set_brake_mode(MOTOR_BRAKE_HOLD);
+    rightMotors.set_brake_mode(MOTOR_BRAKE_HOLD);
+    chassis.cancelAllMotions();
+    leftMotors.move(0);
+    rightMotors.move(0);
+    pros::delay(100);
+    leftMotors.set_brake_mode(MOTOR_BRAKE_COAST);
+    rightMotors.set_brake_mode(MOTOR_BRAKE_COAST);
+}
+
+// Clamps the mogo
+static void mogo_clamp() {
+    mogo.set_value(1);
+}
+
+// Unclamps the mogo
+static void mogo_unclamp() {
+    mogo.set_value(0);
+}
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -106,7 +148,7 @@ void initialize() {
     // thread to for brain screen and position logging
     pros::Task screenTask([&]() {
         while (true) {
-            // print robot location to the abrain screen
+            // print robot location to the brain screen
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
@@ -146,6 +188,7 @@ void competition_initialize() {}
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
+    // // Allaince Carry Rough Draft
     chassis.setPose(0, 0, 0);
     skills::auton_skills(chassis);
 }
@@ -160,41 +203,57 @@ void opcontrol() {
     // loop to continuously update motors
 	bool is_intake_on = false;
     unsigned long long iter = 0;
-    int goal_wallstake_angle = 0;
-	wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
     while (true) {
         // get joystick positions
-        int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
-        int rightX = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
+        int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int rightX = Master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
         // move the chassis with curvature drive
         chassis.arcade(leftY, rightX);
-
-        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+        if(wallScore && Master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+            wall.move(-50);
+            pros::delay(100);
+            wall.move(0);
+            wallScore = false;
+        } else if (wallScore == false && Master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+            wall.move(50);
+            pros::delay(100);
+            wall.move(0);
+            wallScore = true;
+        }
+        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(-127);
-		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(127);
+            // if (ringSense.get_hue() >= 200.0 && ringSense.get_hue() <= 220.0 && ejectRed == false) {
+            //     if(iter%25 == 0) {
+			// 	    intake.move(0);
+            //     }
+			// 	intake.move(127);
+            // } else if (ringSense.get_hue() >= 10.0 && ringSense.get_hue() <= 20.0 && ejectRed) {
+            //     if(iter%25 == 0) {
+			// 	    intake.move(0);
+            //     }
+			// 	intake.move(127);            
+            // }
 		} else {
 			intake.move(0);
 		}
-        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
+        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
 			is_intake_on = !is_intake_on;
 		}
-
-        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-			goal_wallstake_angle = 0;
-		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
-			goal_wallstake_angle = 65;
-		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-			goal_wallstake_angle = 400;
-		}
-
-		// set PID for wallstake
-		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - wall.get_position(0));
-		wall.move(wallstake_pid_output);
-
+        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
+            if (!ejectRed) {
+                ejectRed = 1;
+                Master.print(0, 0, "Now sorting red rings");
+            } else {
+                ejectRed = 0;
+                Master.print(0, 0, "Now sorting blue rings");
+            }
+        }
 		mogo.set_value(is_intake_on);
+        mogo2.set_value(is_intake_on);  
         // delay to save resources
         pros::delay(10);    
-        iter++;
+        iter ++;
     }
 }
