@@ -16,7 +16,14 @@ namespace Right {
         chassis.moveToPoint(-28.17, -40.09, 1000);
         chassis.waitUntilDone();
         run_intake(-127);
-        chassis.turnToHeading(180, 750);
+        chassis.turnToPoint(-35.7, -2.5, 750);
+        chassis.moveToPoint(-35.7, -2.5, 1000);
+        chassis.waitUntilDone();
+        pros::delay(2000);
+        rightMotors.move(-127/2);
+        leftMotors.move(-127/2);
+        pros::delay(1000);
+        chassis.turnToPoint(16, -41.74, 750);
         chassis.moveToPoint(16, -41.74, 1000);
         chassis.waitUntilDone();
         mogo_unclamp();
