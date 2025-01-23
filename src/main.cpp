@@ -9,8 +9,7 @@
 #include "autons/blue_side.h"
 #include "autons/red_side.h"
 #include "autons/common_definitions.h"
-
-#define INTAKE_SPEED -127
+#include "autons/prog_skills.h"
 
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
@@ -25,7 +24,7 @@ pros::Rotation horizontalEnc(17);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -3.5);
 // vertical tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation verticalEnc(7);
+pros::Rotation verticalEnc(12);
 // vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
@@ -142,9 +141,8 @@ void competition_initialize() {}
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    // Allaince Carry Rough Draft
     chassis.setPose(0, 0, 0);
-    Red::Right::TwoRingOneStakeLadderAuton(chassis);
+    skills::auton_skills(chassis);
 }
 bool wallScore = true;
 
@@ -167,9 +165,9 @@ void opcontrol() {
         chassis.arcade(leftY, rightX);
 
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			intake.move(-127);
+			intake.move(INTAKE_SPEED);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			intake.move(127);
+			intake.move(-INTAKE_SPEED);
 		} else {
 			intake.move(0);
 		}
