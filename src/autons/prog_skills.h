@@ -2,6 +2,9 @@
 #include "api.h"
 #include "lemlib/api.hpp"
 #include "common_definitions.h"
+#include "api.h"
+#include "lemlib/api.hpp"
+#include "common_definitions.h"
 
 namespace skills {
     static void auton_skills(lemlib::Chassis& chassis) {

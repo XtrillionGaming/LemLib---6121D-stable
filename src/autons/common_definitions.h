@@ -8,7 +8,7 @@ pros::MotorGroup leftMotors({-8, -14, -10}, pros::MotorGearset::blue); // left m
 pros::MotorGroup rightMotors({19, 9, 20}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
 pros::adi::DigitalOut mogo('H');
-pros::MotorGroup intake({18, -6});
+pros::MotorGroup intake({18, -13});
 pros::MotorGroup wall({-16});
 lemlib::PID wallstakePID(1.5, 0, 0, 10, 0);
 
