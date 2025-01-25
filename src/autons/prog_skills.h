@@ -1,69 +1,75 @@
 
-// #include "api.h"
-// #include "lemlib/api.hpp"
-// #include "common_definitions.h"
+#include "api.h"
+#include "lemlib/api.hpp"
+#include "common_definitions.h"
 
-// namespace skills {
-//     static void auton_skills(lemlib::Chassis& chassis) {
-//         //place bot up againts alliance stake
-//         intake.move(-127);
-//         pros::delay(1000);
-//         chassis.moveToPoint(0, 0,  5000);
-//         chassis.moveToPose(12.758, 23.656, 135, 5000, {.forwards = false}, false);
-//         mogo_clamp();
-//         pros::delay(1000);
-//         chassis.turnToPoint(36.415, 23.39, 5000);
-//         chassis.moveToPoint(36.415, 23.39, 5000);
-//         chassis.turnToPoint(36.415, 23.39, 5000);
-//         chassis.moveToPoint(36.149, 46.781, 5000);
-//         chassis.turnToPoint(59.805, 59.805, 5000);
-//         chassis.moveToPoint(59.805, 59.805, 5000);
-//         chassis.turnToPoint(12.493, 58.476, 5000);
-//         chassis.moveToPoint(12.493, 58.476, 5000);
-//         chassis.turnToPoint(12.758, 47.578, 5000);
-//         chassis.moveToPoint(12.758, 47.578, 5000);
-//         chassis.turnToPoint(0.797, 47.312, 5000);
-//         chassis.moveToPoint(0.797, 47.312, 5000);
-//         chassis.turnToPoint(-2.924, 60.071, 5000, {.forwards = false});
-//         chassis.moveToPoint(-2.924, 60.071, 5000, {.forwards = false}, false);
-//         mogo_unclamp();
-//         chassis.turnToPoint(83.461, 47.312, 5000, {.forwards = true});
-//         chassis.moveToPoint(83.461, 47.312, 5000, {.forwards = true},  false);
-//         intake.move(0);
-//         chassis.turnToPoint(107.383, 0.266, 5000, {.forwards = false});
-//         chassis.moveToPoint(107.383, 0.266, 5000, {.forwards = false}, false);
-//         mogo_clamp();
-//         intake.move(-127);
-//         chassis.turnToPoint(83.727, 23.656, 5000);
-//         chassis.moveToPoint(83.727, 23.656, 5000);
-//         chassis.turnToPoint(60.071, 0.532, 5000);
-//         chassis.moveToPoint(60.071, 0.532, 5000);
-//         chassis.turnToPoint(83.727, -23.39, 5000);
-//         chassis.moveToPoint(83.727, -23.39, 5000);
-//         chassis.turnToPoint(83.461, -46.515, 5000);
-//         chassis.moveToPoint(83.461, -46.515, 5000);
-//         chassis.turnToPoint(59.273, -59.008, 5000);
-//         chassis.moveToPoint(59.273, -59.008, 5000);
-//         chassis.turnToPoint(-1.063, -61.134, 5000);
-//         chassis.moveToPoint(-1.063, -61.134, 5000);
-//         chassis.turnToPoint(11.961, -58.21, 5000, {.forwards = false}, false);
-//         chassis.moveToPoint(11.961, -58.21, 5000, {.forwards = false}, false);
-//         mogo_unclamp();
-//         chassis.turnToPoint(13.29, -23.922, 5000, {.forwards = true}, false);
-//         chassis.moveToPoint(13.29, -23.922, 5000, {.forwards = true}, false);
-//         intake.move(0);
-//         chassis.turnToPoint(1.329, -46.781, 5000, {.forwards = false}, false);
-//         chassis.moveToPoint(1.329, -46.781, 5000, {.forwards = false}, false);
-//         mogo_clamp();
-//         intake.move(-127);
-//         chassis.turnToPoint(12.227, -46.249, 5000);
-//         chassis.moveToPoint(12.227, -46.249, 5000);
-//         chassis.turnToPoint(35.883, -47.047, 5000);
-//         chassis.moveToPoint(35.883, -47.047, 5000);
-//         chassis.turnToPoint(36.415, -23.39, 5000);
-//         chassis.moveToPoint(36.415, -23.39, 5000);
-//         chassis.waitUntilDone();
-//         halt_intake();
-//         mogo_unclamp();
-//     }
-// }
+namespace skills {
+    static void auton_skills(lemlib::Chassis& chassis) {
+        //place bot up against alliance stake
+        pros::delay(1000);
+        chassis.setPose(0, 0, 90);
+        intake.move(-127);
+        chassis.moveToPoint(14.506, -0.734, 1000);
+        chassis.turnToPoint(14.506, -22.768, 1000);        
+        chassis.moveToPoint(14.138, 24.053, 1000);
+        mogo_clamp();
+        chassis.turnToPoint(38.008, 24.421, 1000);
+        chassis.moveToPoint(38.008, 24.421, 1000);
+        chassis.turnToPoint(37.825, 48.291, 1000);
+        chassis.moveToPoint(37.825, 48.291, 1000);
+        chassis.turnToPoint(61.511, 59.675, 1000);
+        chassis.moveToPoint(61.511, 59.675, 1000);
+        chassis.turnToPoint(14.322, 59.675, 1000);
+        chassis.moveToPoint(14.322, 59.675, 1000);
+        chassis.turnToPoint(14.689, 48.107, 1000);
+        chassis.moveToPoint(14.689, 48.107, 1000);
+        chassis.turnToPoint(2.571, 47.923, 1000);
+        chassis.moveToPoint(2.571, 47.923, 1000);
+        chassis.turnToPoint(7.528, 8.813, 1000);
+        chassis.moveToPoint(1.102, 59.491, 1000);
+        mogo_unclamp();
+        chassis.turnToPoint(7.528, 8.813, 1000);
+        chassis.moveToPoint(7.528, 8.813, 1000);
+        chassis.turnToPoint(1.102, 59.491, 1000);
+        chassis.moveToPoint(14.506, -22.768, 1000);
+        mogo_clamp();
+        chassis.turnToPoint(38.008, -22.952, 1000);
+        chassis.moveToPoint(38.008, -22.952, 1000);
+        chassis.turnToPoint(61.511, -58.206, 1000);
+        chassis.moveToPoint(61.511, -58.206, 1000);
+        chassis.turnToPoint(38.008, -46.271, 1000);
+        chassis.moveToPoint(38.008, -46.271, 1000);
+        chassis.turnToPoint(14.322, -58.022, 1000);
+        chassis.moveToPoint(14.322, -58.022, 1000);
+        chassis.turnToPoint(14.322, -46.454, 1000);
+        chassis.moveToPoint(14.322, -46.454, 1000);
+        chassis.turnToPoint(2.571, -46.454, 1000);
+        chassis.moveToPoint(2.571, -46.454, 1000);
+        chassis.turnToPoint(14.506, -0.734, 1000);
+        chassis.moveToPoint(-0.734, -57.104, 1000);
+        mogo_unclamp();
+        chassis.turnToPoint(85.381, -46.087, 1000);
+        //wall stake ready
+        chassis.moveToPoint(85.381, -46.087, 1000);
+        chassis.moveToPoint(61.511, -47.372, 1000);
+        chassis.turnToPoint(61.327, -67.386, 1000);
+        chassis.moveToPoint(61.327, -67.386, 1000);
+        //wall stake score
+        chassis.moveToPoint(96.765, -54.166, 1000);
+        chassis.turnToPoint(95.112, -62.062, 1000);
+        chassis.moveToPoint(108.883, 0.551, 1000);
+        mogo_clamp();
+        chassis.turnToPoint(85.381, -22.952, 1000);
+        chassis.moveToPoint(85.381, -22.952, 1000);
+        chassis.turnToPoint(61.511, 0.918, 1000);
+        chassis.moveToPoint(61.511, 0.918, 1000);
+        chassis.turnToPoint(84.83, 24.237, 1000);
+        chassis.moveToPoint(84.83, 24.237, 1000);
+        chassis.turnToPoint(85.013, 47.556, 1000);
+        chassis.moveToPoint(85.013, 47.556, 1000);
+        intake.move(0);
+        mogo_unclamp();
+        leftMotors.move(127);
+        rightMotors.move(127);
+    }
+}

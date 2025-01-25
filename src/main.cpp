@@ -9,6 +9,7 @@
 #include "autons/blue_side.h"
 #include "autons/red_side.h"
 #include "autons/common_definitions.h"
+#include "autons/prog_skills.h"
 
 #define INTAKE_SPEED -127
 
@@ -142,7 +143,6 @@ void competition_initialize() {}
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    // Allaince Carry Rough Draft
     chassis.setPose(0, 0, 0);
     Red::Right::TwoRingOneStakeLadderAuton(chassis);
 }
