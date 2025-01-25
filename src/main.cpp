@@ -144,7 +144,7 @@ void competition_initialize() {}
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-    Red::Right::TwoRingOneStakeLadderAuton(chassis);
+    skills::auton_skills(chassis);
 }
 bool wallScore = true;
 
