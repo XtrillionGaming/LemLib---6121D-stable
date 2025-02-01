@@ -3,6 +3,7 @@
 #include "lemlib/asset.hpp"
 #include "lemlib/chassis/chassis.hpp"
 #include "pros/colors.hpp"
+#include "pros/misc.h"
 #include "pros/motor_group.hpp"
 #include "pros/optical.hpp"
 #include "pros/rtos.hpp"
@@ -145,14 +146,14 @@ void colorStop() {
 }
 
 std::string color = "";
-
+// checks if ring is wrong color
 void colorCheck(bool isRed) {
-    if(ringSense.get_hue()>=215 && ringSense.get_hue()>=220 && isRed == false) {
+    //if blue
+    if(ringSense.get_hue()>=215 && ringSense.get_hue()<=220 && isRed == false) {
         colorStop();
-        color = "Blue";
     } else if(ringSense.get_hue()>=5 && ringSense.get_hue()<=15 && isRed) {
+        //if red
         colorStop();
-        color = "Red";
     }
     pros::delay(10);
     iter ++;
@@ -175,6 +176,7 @@ void opcontrol() {
     // loop to continuously update motors
 	bool is_intake_on = false;
     int goal_wallstake_angle = 0;
+    bool isRed = true;
 	wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
     while (true) {
         // get joystick positions
@@ -184,7 +186,7 @@ void opcontrol() {
         chassis.arcade(leftY, rightX);
 
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-            colorCheck(true);
+            colorCheck(isRed);
 			intake.move(INTAKE_SPEED);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(-INTAKE_SPEED);
@@ -202,6 +204,17 @@ void opcontrol() {
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 			goal_wallstake_angle = 400;
 		}
+        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)&&isRed) {
+            isRed = false;
+        }
+        else if(Master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+            isRed = true;
+        }
+        if(isRed) {
+            color = "Red";
+        } else {
+            color = "Blue";
+        }
 
 		// set PID for wallstake
 		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - wall.get_position(0));
