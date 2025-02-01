@@ -3,6 +3,7 @@
 #include "lemlib/asset.hpp"
 #include "lemlib/chassis/chassis.hpp"
 #include "pros/colors.hpp"
+#include "pros/distance.hpp"
 #include "pros/misc.h"
 #include "pros/motor_group.hpp"
 #include "pros/optical.hpp"
@@ -19,6 +20,10 @@ pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
 //color sensor
 pros::Optical ringSense(69);
+
+//distance sensor
+pros::Distance Ds1(90);
+pros::Distance Ds2(91);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
@@ -128,6 +133,29 @@ void initialize() {
  * Runs while the robot is disabled
  */
 void disabled() {}
+
+//distance values angle and true distance
+float dl = Ds1.get_distance(); // left sensor dist
+float dr = Ds2.get_distance(); // right distance
+float theta;
+float dist = (dl+dr)/2;
+float between;
+float spacing = 10;
+
+void wallDist() {
+    if(dl<dr) {
+        between = dist-dl;
+        float subTheta = atan2f(between, (spacing/2));
+        theta = 90-subTheta;
+    } else if (dr<dl) {
+        between = dist-dr;
+        float subTheta = atan2f(between, (spacing/2));
+        theta = 90-subTheta;
+    } else {
+        between = 0;
+        theta = 0;
+    }
+}
 
 /**
  * runs after initialize if the robot is connected to field control
