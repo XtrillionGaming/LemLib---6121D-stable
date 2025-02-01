@@ -5,11 +5,15 @@
 #include "api.h"
 #include "lemlib/api.hpp"
 #include "common_definitions.h"
+#include "main.h"
 
 namespace skills {
     static void auton_skills(lemlib::Chassis& chassis) {
         //place bot up against alliance stake
         pros::delay(1000);
+        while(true) {
+            colorCheck(true);
+        }
         chassis.setPose(0, 0, 90);
         intake.move(-127);
         chassis.moveToPoint(14.506, -0.734, 1000);

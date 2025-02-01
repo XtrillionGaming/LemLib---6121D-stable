@@ -2,6 +2,7 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/asset.hpp"
 #include "lemlib/chassis/chassis.hpp"
+#include "pros/colors.hpp"
 #include "pros/motor_group.hpp"
 #include "pros/optical.hpp"
 #include "pros/rtos.hpp"
@@ -113,6 +114,7 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
+            Master.print(0, 0, "is red:", pros::Color());
             // log position telemetry
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
             // delay to save resources
@@ -142,11 +144,15 @@ void colorStop() {
     }
 }
 
+std::string color = "";
+
 void colorCheck(bool isRed) {
     if(ringSense.get_hue()>=215 && ringSense.get_hue()>=220 && isRed == false) {
         colorStop();
+        color = "Blue";
     } else if(ringSense.get_hue()>=5 && ringSense.get_hue()<=15 && isRed) {
         colorStop();
+        color = "Red";
     }
     pros::delay(10);
     iter ++;

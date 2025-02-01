@@ -3,6 +3,7 @@
 #include "api.h"
 #include "lemlib/api.hpp"
 #include "common_definitions.h"
+#include "main.h"
 
 namespace Blue {
 
@@ -12,6 +13,9 @@ namespace Right {
         chassis.moveToPose(-0, -41, 0, 1500, {.forwards = false}, false);
         mogo_clamp();
         pros::delay(500);
+        while (true) {
+            colorCheck(true);
+        }
         chassis.turnToPoint(28.17, -40.09, 1000);
         chassis.moveToPoint(28.17, -40.09, 1000);
         chassis.waitUntilDone();
@@ -37,6 +41,9 @@ namespace Left {
         chassis.moveToPose(-0, -42, 0, 1000, {.forwards = false}, false);
         mogo_clamp();
         pros::delay(500);
+        while (true) {
+            colorCheck(true);
+        }
         run_intake(-127);
         chassis.turnToPoint(-17.61, -63.31, 750);
         chassis.moveToPoint(-17.61, -63.31, 2000);
