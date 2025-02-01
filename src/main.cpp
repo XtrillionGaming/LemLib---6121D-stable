@@ -204,6 +204,7 @@ void opcontrol() {
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 			goal_wallstake_angle = 400;
 		}
+        //switch colors
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)&&isRed) {
             isRed = false;
         }
