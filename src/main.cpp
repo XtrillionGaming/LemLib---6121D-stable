@@ -133,8 +133,24 @@ void competition_initialize() {}
 
 // get a path used for pure pursuit
 // this needs to be put outside a function
+unsigned long long iter = 0;
 
+void colorStop() {
+    long ite = iter;
+    if(ite == iter) {
+        intake.move(0);
+    }
+}
 
+void colorCheck(bool isRed) {
+    if(ringSense.get_hue()>=215 && ringSense.get_hue()>=220 && isRed == false) {
+        colorStop();
+    } else if(ringSense.get_hue()>=5 && ringSense.get_hue()<=15 && isRed) {
+        colorStop();
+    }
+    pros::delay(10);
+    iter ++;
+}
 /**
  * Runs during auto
  *
@@ -144,8 +160,6 @@ void autonomous() {
     chassis.setPose(0, 0, 0);
     skills::auton_skills(chassis);
 }
-bool wallScore = true;
-
 /**
  * Runs in driver control
  */
@@ -154,7 +168,6 @@ void opcontrol() {
     // controller
     // loop to continuously update motors
 	bool is_intake_on = false;
-    unsigned long long iter = 0;
     int goal_wallstake_angle = 0;
 	wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
     while (true) {
@@ -165,6 +178,7 @@ void opcontrol() {
         chassis.arcade(leftY, rightX);
 
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+            colorCheck(true);
 			intake.move(INTAKE_SPEED);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(-INTAKE_SPEED);
@@ -190,6 +204,8 @@ void opcontrol() {
 		mogo.set_value(is_intake_on);
         // delay to save resources
         pros::delay(10);    
-        iter++;
     }
 }
+
+
+
