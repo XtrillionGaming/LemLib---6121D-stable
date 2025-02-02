@@ -145,12 +145,10 @@ float spacing = 10;
 void wallDist() {
     if(dl<dr) {
         between = dist-dl;
-        float subTheta = atan2f(between, (spacing/2));
-        theta = 90-subTheta;
+        theta = atan2f(between, (spacing/2));
     } else if (dr<dl) {
         between = dist-dr;
-        float subTheta = atan2f(between, (spacing/2));
-        theta = 90-subTheta;
+        theta = atan2f(between, (spacing/2));
     } else {
         between = 0;
         theta = 0;
