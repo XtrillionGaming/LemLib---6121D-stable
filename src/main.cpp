@@ -14,17 +14,16 @@
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
-
 //color sensor
 pros::Optical ringSense(69);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation horizontalEnc(17);
+pros::Rotation horizontalEnc(13);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -3.5);
 // vertical tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation verticalEnc(12);
+pros::Rotation verticalEnc(69);
 // vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
@@ -97,6 +96,7 @@ bool ejectRed = false;
 void initialize() {
     pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
+    ladybrown_sensor.reset_position();
 
     // the default rate is 50. however, if you need to change the rate, you
     // can do the following.
@@ -113,6 +113,7 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
+            pros::lcd::print(3, "Wall: %i", ladybrown_sensor.get_angle() / 100); // wall stake angle
             // log position telemetry
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
             // delay to save resources
@@ -142,7 +143,13 @@ void competition_initialize() {}
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-    skills::auton_skills(chassis);
+    rightMotors.move(-127*0.5);
+    leftMotors.move(-127*0.5);
+    pros::delay(1250);
+    rightMotors.move(0);
+    leftMotors.move(0);
+    // skills::auton_skills(chassis);
+
 }
 bool wallScore = true;
 
@@ -178,13 +185,13 @@ void opcontrol() {
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 			goal_wallstake_angle = 0;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
-			goal_wallstake_angle = 65;
+			goal_wallstake_angle = 25;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-			goal_wallstake_angle = 400;
+			goal_wallstake_angle = 120;
 		}
 
 		// set PID for wallstake
-		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - wall.get_position(0));
+		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - ladybrown_sensor.get_position() / 100);
 		wall.move(wallstake_pid_output);
 
 		mogo.set_value(is_intake_on);
