@@ -2,6 +2,9 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/asset.hpp"
 #include "lemlib/chassis/chassis.hpp"
+#include "pros/colors.hpp"
+#include "pros/distance.hpp"
+#include "pros/misc.h"
 #include "pros/motor_group.hpp"
 #include "pros/optical.hpp"
 #include "pros/rtos.hpp"
@@ -14,18 +17,23 @@
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
+
 //color sensor
 pros::Optical ringSense(69);
+
+//distance sensor
+pros::Distance Ds1(90);
+pros::Distance Ds2(91);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
 pros::Rotation horizontalEnc(13);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -3.5);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 0);
 // vertical tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation verticalEnc(69);
+// pros::Rotation verticalEnc(12);
 // vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
+// lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
@@ -37,7 +45,7 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(10, // proportional gain (kP)
+lemlib::ControllerSettings linearController(9, // proportional gain (kP)
                                             0, // integral gain (kI)
                                             3, // derivative gain (kD)
                                             3, // anti windup
@@ -61,7 +69,7 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
+lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
@@ -96,7 +104,6 @@ bool ejectRed = false;
 void initialize() {
     pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
-    ladybrown_sensor.reset_position();
 
     // the default rate is 50. however, if you need to change the rate, you
     // can do the following.
@@ -113,7 +120,7 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            pros::lcd::print(3, "Wall: %i", ladybrown_sensor.get_angle() / 100); // wall stake angle
+            Master.print(0, 0, "get rid of:", pros::Color());
             // log position telemetry
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
             // delay to save resources
@@ -127,6 +134,27 @@ void initialize() {
  */
 void disabled() {}
 
+//distance values angle and true distance
+float dl = Ds1.get_distance(); // left sensor dist
+float dr = Ds2.get_distance(); // right distance
+float theta;
+float dist = (dl+dr)/2;
+float between;
+float spacing = 10;
+
+void wallDist() {
+    if(dl<dr) {
+        between = dist-dl;
+        theta = atan2f(between, (spacing/2));
+    } else if (dr<dl) {
+        between = dist-dr;
+        theta = atan2f(between, (spacing/2));
+    } else {
+        between = 0;
+        theta = 0;
+    }
+}
+
 /**
  * runs after initialize if the robot is connected to field control
  */
@@ -134,8 +162,28 @@ void competition_initialize() {}
 
 // get a path used for pure pursuit
 // this needs to be put outside a function
+unsigned long long iter = 0;
 
+void colorStop() {
+    long ite = iter;
+    if(ite == iter) {
+        intake.move(0);
+    }
+}
 
+std::string color = "";
+// checks if ring is wrong color
+void colorCheck(bool isRed) {
+    //if blue
+    if(ringSense.get_hue()>=215 && ringSense.get_hue()<=220 && isRed == false) {
+        colorStop();
+    } else if(ringSense.get_hue()>=5 && ringSense.get_hue()<=15 && isRed) {
+        //if red
+        colorStop();
+    }
+    pros::delay(10);
+    iter ++;
+}
 /**
  * Runs during auto
  *
@@ -143,16 +191,8 @@ void competition_initialize() {}
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-    rightMotors.move(-127*0.5);
-    leftMotors.move(-127*0.5);
-    pros::delay(1250);
-    rightMotors.move(0);
-    leftMotors.move(0);
-    // skills::auton_skills(chassis);
-
+    skills::auton_skills(chassis);
 }
-bool wallScore = true;
-
 /**
  * Runs in driver control
  */
@@ -161,8 +201,8 @@ void opcontrol() {
     // controller
     // loop to continuously update motors
 	bool is_intake_on = false;
-    unsigned long long iter = 0;
     int goal_wallstake_angle = 0;
+    bool isRed = true;
 	wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
     while (true) {
         // get joystick positions
@@ -172,6 +212,7 @@ void opcontrol() {
         chassis.arcade(leftY, rightX);
 
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+            colorCheck(isRed);
 			intake.move(INTAKE_SPEED);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(-INTAKE_SPEED);
@@ -185,18 +226,32 @@ void opcontrol() {
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 			goal_wallstake_angle = 0;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
-			goal_wallstake_angle = 25;
+			goal_wallstake_angle = 65;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-			goal_wallstake_angle = 120;
+			goal_wallstake_angle = 400;
 		}
+        //switch colors
+        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)&&isRed) {
+            isRed = false;
+        }
+        else if(Master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+            isRed = true;
+        }
+        if(isRed) {
+            color = "Red";
+        } else {
+            color = "Blue";
+        }
 
 		// set PID for wallstake
-		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - ladybrown_sensor.get_position() / 100);
+		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - wall.get_position(0));
 		wall.move(wallstake_pid_output);
 
 		mogo.set_value(is_intake_on);
         // delay to save resources
         pros::delay(10);    
-        iter++;
     }
 }
+
+
+
