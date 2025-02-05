@@ -9,7 +9,11 @@
 namespace skills {
     static void auton_skills(lemlib::Chassis& chassis) {
         //place bot up against alliance stake
+        //place bot up against alliance stake
         pros::delay(1000);
+        while(true) {
+            colorCheck(true);
+        }
         chassis.setPose(0, 0, 90);
         intake.move(-127);
         pros::delay(1000);

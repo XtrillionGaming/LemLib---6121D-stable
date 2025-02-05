@@ -24,6 +24,7 @@
  * E_CONTROLLER_MASTER is pedantically correct within the PROS styleguide, but
  * not convenient for most student programmers.
  */
+#include "pros/optical.hpp"
 #define PROS_USE_SIMPLE_NAMES
 
 /**
@@ -66,6 +67,8 @@ void initialize(void);
 void disabled(void);
 void competition_initialize(void);
 void opcontrol(void);
+void colorCheck(bool isRed);
+void colorStop();
 #ifdef __cplusplus
 }
 #endif
