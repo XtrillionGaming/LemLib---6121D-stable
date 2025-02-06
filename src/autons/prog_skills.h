@@ -5,10 +5,10 @@
 #include "api.h"
 #include "lemlib/api.hpp"
 #include "common_definitions.h"
-#include "main.h"
 
 namespace skills {
     static void auton_skills(lemlib::Chassis& chassis) {
+        //place bot up against alliance stake
         //place bot up against alliance stake
         pros::delay(1000);
         while(true) {
@@ -16,9 +16,11 @@ namespace skills {
         }
         chassis.setPose(0, 0, 90);
         intake.move(-127);
+        pros::delay(1000);
         chassis.moveToPoint(14.506, -0.734, 1000);
         chassis.turnToPoint(14.506, -22.768, 1000);        
-        chassis.moveToPoint(14.138, 24.053, 1000);
+        chassis.moveToPoint(14.138, 24.053, 1000, {.forwards = false}, false);
+        chassis.waitUntilDone();
         mogo_clamp();
         chassis.turnToPoint(38.008, 24.421, 1000);
         chassis.moveToPoint(38.008, 24.421, 1000);
@@ -33,12 +35,14 @@ namespace skills {
         chassis.turnToPoint(2.571, 47.923, 1000);
         chassis.moveToPoint(2.571, 47.923, 1000);
         chassis.turnToPoint(7.528, 8.813, 1000);
-        chassis.moveToPoint(1.102, 59.491, 1000);
+        chassis.moveToPoint(1.102, 59.491, 1000, {.forwards=false}, false);
+        chassis.waitUntilDone();
         mogo_unclamp();
         chassis.turnToPoint(7.528, 8.813, 1000);
         chassis.moveToPoint(7.528, 8.813, 1000);
         chassis.turnToPoint(1.102, 59.491, 1000);
-        chassis.moveToPoint(14.506, -22.768, 1000);
+        chassis.moveToPoint(14.506, -22.768, 1000, {.forwards=false}, false);
+        chassis.waitUntilDone();
         mogo_clamp();
         chassis.turnToPoint(38.008, -22.952, 1000);
         chassis.moveToPoint(38.008, -22.952, 1000);
@@ -53,7 +57,8 @@ namespace skills {
         chassis.turnToPoint(2.571, -46.454, 1000);
         chassis.moveToPoint(2.571, -46.454, 1000);
         chassis.turnToPoint(14.506, -0.734, 1000);
-        chassis.moveToPoint(-0.734, -57.104, 1000);
+        chassis.moveToPoint(-0.734, -57.104, 1000, {.forwards=false}, false);
+        chassis.waitUntilDone();
         mogo_unclamp();
         chassis.turnToPoint(85.381, -46.087, 1000);
         //wall stake ready
@@ -64,7 +69,8 @@ namespace skills {
         //wall stake score
         chassis.moveToPoint(96.765, -54.166, 1000);
         chassis.turnToPoint(95.112, -62.062, 1000);
-        chassis.moveToPoint(108.883, 0.551, 1000);
+        chassis.moveToPoint(108.883, 0.551, 1000, {.forwards=false});
+        chassis.waitUntilDone();
         mogo_clamp();
         chassis.turnToPoint(85.381, -22.952, 1000);
         chassis.moveToPoint(85.381, -22.952, 1000);
