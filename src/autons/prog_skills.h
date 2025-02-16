@@ -82,8 +82,5 @@ namespace skills {
         chassis.moveToPoint(85.013, 47.556, 1000);
         intake.move(0);
         mogo_unclamp();
-        //do not remove these lines
-        leftMotors.move(-127);
-        rightMotors.move(127);
     }
 }
