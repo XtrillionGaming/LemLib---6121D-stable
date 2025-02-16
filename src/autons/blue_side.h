@@ -10,27 +10,32 @@ namespace Blue {
 namespace Right {
     // align to closest mobile goal right up against the wall (4 points)
     static void TwoRingOneStakeLadderAuton(lemlib::Chassis& chassis) {
-        chassis.moveToPose(-0, -41, 0, 1500, {.forwards = false}, false);
+        chassis.moveToPoint(3.157, -37.415, 1500, {.forwards = false});
+        chassis.waitUntilDone();
         mogo_clamp();
         pros::delay(500);
-        while (true) {
-            colorCheck(true);
-        }
-        chassis.turnToPoint(28.17, -40.09, 1000);
-        chassis.moveToPoint(28.17, -40.09, 1000);
-        chassis.waitUntilDone();
         run_intake(-127);
-        chassis.turnToPoint(35.7, -1, 750);
-        chassis.moveToPoint(35.7, -1, 1000);
+        chassis.turnToPoint(27.184, -30.719, 1000);
+        chassis.moveToPoint(27.184, -30.719, 1000);
         chassis.waitUntilDone();
         pros::delay(2000);
-        rightMotors.move(-127/2);
-        leftMotors.move(-127/2);
-        pros::delay(1000);
-        chassis.turnToPoint(-16, -41.74, 750);
-        chassis.moveToPoint(-16, -41.74, 1000);
-        chassis.waitUntilDone();
         mogo_unclamp();
+        chassis.turnToPoint(32.036, -42.597, 750);
+        chassis.moveToPoint(32.036, -42.597, 750);
+        chassis.turnToHeading(47 + 180, 250);
+        chassis.waitUntilDone();
+        doinker.set_value(1);
+        pros::delay(500);
+        chassis.turnToPoint(-1.064, -16.969, 750, {.forwards=false});
+        chassis.moveToPoint(-1.064, -16.969, 1000, {.forwards=false});
+        chassis.waitUntilDone();
+        doinker.set_value(0);
+        chassis.turnToPoint(2.425, -53.003, 750);
+        chassis.moveToPoint(2.425, -53.003, 1000);
+        chassis.waitUntilDone();
+        wall.move(127/2);
+        pros::delay(1500);
+        wall.move(0);
         halt_intake();
     }
 };

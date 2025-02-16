@@ -68,7 +68,6 @@ void disabled(void);
 void competition_initialize(void);
 void opcontrol(void);
 void colorCheck(bool isRed);
-void colorStop();
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,6 @@
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "lemlib/timer.hpp"
 #include "lemlib/asset.hpp"
 #include "lemlib/chassis/chassis.hpp"
 #include "pros/colors.hpp"
@@ -13,63 +14,56 @@
 #include "autons/red_side.h"
 #include "autons/common_definitions.h"
 #include "autons/prog_skills.h"
+#include "autons/pidTest.h"
 
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
-
-
-//color sensor
-pros::Optical ringSense(69);
-
-//distance sensor
-pros::Distance Ds1(90);
-pros::Distance Ds2(91);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
 pros::Rotation horizontalEnc(13);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 0);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -5.5);
 // vertical tracking wheel encoder. Rotation sensor, port 20, not reversed
-// pros::Rotation verticalEnc(12);
+pros::Rotation verticalEnc(5);
 // vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-// lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0.25);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               &rightMotors, // right motor group
-                              15, // 10 inch track width
+                              14.5, // 10 inch track width
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
                               450, // drivetrain rpm is 360
-                              2 // horizontal drift is 2. If we had traction wheels, it would have been 8
+                              8 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(9, // proportional gain (kP)
-                                            0, // integral gain (kI)
-                                            3, // derivative gain (kD)
+lemlib::ControllerSettings linearController(4.5, // proportional gain (kP)
+                                            0.2, // integral gain (kI)
+                                            9, // derivative gain (kD)
                                             3, // anti windup
-                                            1, // small error range, in inches
-                                            100, // small error range timeout, in milliseconds
-                                            3, // large error range, in inches
-                                            500, // large error range timeout, in milliseconds
-                                            20 // maximum acceleration (slew)
+                                            0, // small error range, in inches
+                                            0, // small error range timeout, in milliseconds
+                                            0, // large error range, in inches
+                                            0, // large error range timeout, in milliseconds
+                                            0 // maximum acceleration (slew)
 );
 
 // angular motion controller
-lemlib::ControllerSettings angularController(2, // proportional gain (kP)
-                                             0, // integral gain (kI)
-                                             10, // derivative gain (kD)
-                                             3, // anti windup
-                                             1, // small error range, in degrees
-                                             100, // small error range timeout, in milliseconds
-                                             3, // large error range, in degrees
-                                             500, // large error range timeout, in milliseconds
+lemlib::ControllerSettings angularController(0.92, // .9, // proportional gain (kP)
+                                             0.1, // .1, // integral gain (kI)
+                                             0, // 0, // derivative gain (kD)
+                                             3, // 3, // anti windup
+                                             0, // 0.00001, // small error range, in degrees
+                                             0, // 100, // small error range timeout, in milliseconds
+                                             0, // 0.0001, // large error range, in degrees
+                                             0, // 500, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
+lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
@@ -90,8 +84,6 @@ lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
 
 // create the chassis
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
-
-bool ejectRed = false;
 // Runs the intake in
 
 
@@ -104,6 +96,7 @@ bool ejectRed = false;
 void initialize() {
     pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
+    ladybrown_sensor.reset_position();
 
     // the default rate is 50. however, if you need to change the rate, you
     // can do the following.
@@ -120,7 +113,8 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            Master.print(0, 0, "get rid of:", pros::Color());
+            // Master.print(0, 0, "Sensor: %i", distance_sensor.get_distance());
+            
             // log position telemetry
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
             // delay to save resources
@@ -134,27 +128,6 @@ void initialize() {
  */
 void disabled() {}
 
-//distance values angle and true distance
-float dl = Ds1.get_distance(); // left sensor dist
-float dr = Ds2.get_distance(); // right distance
-float theta;
-float dist = (dl+dr)/2;
-float between;
-float spacing = 10;
-
-void wallDist() {
-    if(dl<dr) {
-        between = dist-dl;
-        theta = atan2f(between, (spacing/2));
-    } else if (dr<dl) {
-        between = dist-dr;
-        theta = atan2f(between, (spacing/2));
-    } else {
-        between = 0;
-        theta = 0;
-    }
-}
-
 /**
  * runs after initialize if the robot is connected to field control
  */
@@ -162,28 +135,15 @@ void competition_initialize() {}
 
 // get a path used for pure pursuit
 // this needs to be put outside a function
-unsigned long long iter = 0;
 
-void colorStop() {
-    long ite = iter;
-    if(ite == iter) {
-        intake.move(0);
+double filter_angle(double angle) {
+    if (angle > 180) {
+        return 360 - angle;
+    } else {
+        return angle;
     }
 }
 
-std::string color = "";
-// checks if ring is wrong color
-void colorCheck(bool isRed) {
-    //if blue
-    if(ringSense.get_hue()>=215 && ringSense.get_hue()<=220 && isRed == false) {
-        colorStop();
-    } else if(ringSense.get_hue()>=5 && ringSense.get_hue()<=15 && isRed) {
-        //if red
-        colorStop();
-    }
-    pros::delay(10);
-    iter ++;
-}
 /**
  * Runs during auto
  *
@@ -191,18 +151,17 @@ void colorCheck(bool isRed) {
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-    skills::auton_skills(chassis);
+    //skills::auton_skills(chassis);
+    Red::Right::TwoRingOneStakeLadderAuton(chassis);
 }
 /**
  * Runs in driver control
  */
 void opcontrol() {
-    // autonomous();
     // controller
     // loop to continuously update motors
 	bool is_intake_on = false;
     int goal_wallstake_angle = 0;
-    bool isRed = true;
 	wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
     while (true) {
         // get joystick positions
@@ -212,39 +171,28 @@ void opcontrol() {
         chassis.arcade(leftY, rightX);
 
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-            colorCheck(isRed);
 			intake.move(INTAKE_SPEED);
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			intake.move(-INTAKE_SPEED);
 		} else {
 			intake.move(0);
 		}
-        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
+        if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) { 
 			is_intake_on = !is_intake_on;
 		}
 
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 			goal_wallstake_angle = 0;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
-			goal_wallstake_angle = 65;
+			goal_wallstake_angle = 35;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-			goal_wallstake_angle = 400;
+			goal_wallstake_angle = 150;
 		}
-        //switch colors
-        if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)&&isRed) {
-            isRed = false;
-        }
-        else if(Master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-            isRed = true;
-        }
-        if(isRed) {
-            color = "Red";
-        } else {
-            color = "Blue";
-        }
+        
+        doinker.set_value(Master.get_digital(pros::E_CONTROLLER_DIGITAL_R1));
 
 		// set PID for wallstake
-		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - wall.get_position(0));
+		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - filter_angle(ladybrown_sensor.get_angle()/100));
 		wall.move(wallstake_pid_output);
 
 		mogo.set_value(is_intake_on);
