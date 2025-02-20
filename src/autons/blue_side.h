@@ -1,6 +1,7 @@
 
 
 #include "api.h"
+#include "chassis.hpp"
 #include "lemlib/api.hpp"
 #include "common_definitions.h"
 #include "main.h"
@@ -45,6 +46,27 @@ namespace Right {
             pros::delay(10);
         }
     }
+
+    static void RingRush(lemlib::Chassis& chassis) {
+        pros::delay(500);
+        intake.move(-127);
+        chassis.setPose(0, 0, 90);
+        chassis.moveToPoint(0, 0, 5000);
+        chassis.moveToPoint(-35.617, 0.542, 5000, {.forwards = false});
+        mogo_clamp();
+        chassis.waitUntilDone();
+        chassis.turnToPoint(-48.816, -14.102, 5000);
+        chassis.moveToPoint(-48.816, -14.102, 5000);
+        chassis.turnToPoint(-50.443, -21.153, 5000);
+        chassis.moveToPoint(-50.443, -21.153, 5000);
+        chassis.turnToPoint(-49.358, -32.182, 5000);
+        chassis.moveToPoint(-49.358, -32.182, 5000);
+        chassis.turnToPoint(-35.437, -23.142, 5000);
+        chassis.moveToPoint(-35.437, -23.142, 5000);
+        chassis.turnToPoint(-35.075, -23.865, 5000);
+        mogo_unclamp();
+        chassis.moveToPoint(-35.075, 23.865, 5000);
+    }
 };
 
 namespace Left {
@@ -72,5 +94,32 @@ namespace Left {
         
     // }
 };
+
+namespace Solo {
+    static void SoloAWP (lemlib::Chassis& chassis) {
+        pros::delay(1000);
+        intake.move(-127);
+        chassis.setPose(0, 0, 90);
+        chassis.moveToPoint(0, 0, 5000);
+        chassis.moveToPoint(-34.894, -0.362, 5000, {.forwards = false});
+        mogo_clamp();
+        chassis.waitUntilDone();
+        chassis.turnToPoint(-35.437, 23.685, 5000);
+        chassis.moveToPoint(-35.437, 23.685, 5000);
+        chassis.turnToPoint(-22.781, -23.323, 5000);
+        chassis.moveToPoint(-22.781, -23.323, 5000);
+        mogo_unclamp();
+        chassis.turnToPoint(0, 0, 5000);
+        chassis.moveToPoint(-34.894, -47.55, 5000, {.forwards = false});
+        mogo_clamp();
+        chassis.waitUntilDone();
+        chassis.turnToPoint(-35.256, -71.054, 5000);
+        chassis.moveToPoint(-35.256, -71.054, 5000);
+        chassis.turnToPoint(-35.256, -24.227, 5000);
+        chassis.moveToPoint(-35.256, -24.227, 5000);
+        mogo_unclamp();
+    }
+    
+}
 
 };
