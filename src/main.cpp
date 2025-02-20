@@ -132,27 +132,19 @@ void disabled() {}
  * runs after initialize if the robot is connected to field control
  */
 void competition_initialize() {}
-
+ 
 // get a path used for pure pursuit
 // this needs to be put outside a function
-
-double filter_angle(double angle) {
-    if (angle > 180) {
-        return 360 - angle;
-    } else {
-        return angle;
-    }
-}
 
 /**
  * Runs during auto
  *
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
-void autonomous() {
+void autonomous() { 
     chassis.setPose(0, 0, 0);
-    //skills::auton_skills(chassis);
-    Red::Right::TwoRingOneStakeLadderAuton(chassis);
+    // skills::auton_skills(chassis);
+    Blue::Right::TwoRingOneStakeLadderAuton(chassis);
 }
 /**
  * Runs in driver control
@@ -186,7 +178,7 @@ void opcontrol() {
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
 			goal_wallstake_angle = 35;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-			goal_wallstake_angle = 150;
+			goal_wallstake_angle = SCORE_FULL;
 		}
         
         doinker.set_value(Master.get_digital(pros::E_CONTROLLER_DIGITAL_R1));
