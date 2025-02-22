@@ -138,8 +138,11 @@ namespace skills {
 
         run_intake(127);
         chassis.moveToPoint(10.9, 112.33, 2000); // TODO
+        chassis.waitUntilDone();
+        doinker.set_value(1);
         chassis.turnToPoint(4.07, 110.71, 750, {.forwards=false});
         chassis.waitUntilDone();
+        doinker.set_value(0);
         rightMotors.move(70);
         leftMotors.move(70);
         pros::delay(1500);
