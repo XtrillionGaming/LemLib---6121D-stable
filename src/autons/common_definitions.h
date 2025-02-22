@@ -16,7 +16,7 @@ lemlib::PID wallstakePID(1.5, 0, 1, 10, 0);
 
 pros::Rotation ladybrown_sensor(-7);
 pros::Distance distance_sensor_back(17);
-pros::Distance distance_sensor_right(69);
+pros::Distance distance_sensor_right(11);
 
 // Inertial Sensor on port 10
 pros::Imu imu(15);

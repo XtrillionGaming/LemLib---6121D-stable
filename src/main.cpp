@@ -113,7 +113,7 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            // Master.print(0, 0, "Sensor: %i", distance_sensor.get_distance());
+            Master.print(0, 0, "Sensor: %i", distance_sensor_back.get_distance());
             
             // log position telemetry
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
@@ -141,10 +141,9 @@ void competition_initialize() {}
  *
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
-void autonomous() { 
+void autonomous() {
     chassis.setPose(0, 0, 0);
-    // skills::auton_skills(chassis);
-    Blue::Right::TwoRingOneStakeLadderAuton(chassis);
+    skills::auton_skills(chassis);
 }
 /**
  * Runs in driver control
