@@ -10,25 +10,25 @@ namespace Red {
 namespace Right {
     // align to closest mobile goal right up against the wall (4 points)
     static void GoalRush(lemlib::Chassis& chassis) {
+        chassis.setPose(3.502, -1.646, 4.51);
         chassis.turnToPoint(0, -37.415, 500, {.forwards = false});
         chassis.moveToPoint(0, -37.415, 1000, {.forwards = false});
         chassis.waitUntilDone();
         mogo_clamp();
         pros::delay(500);
         run_intake(-127);
-        chassis.turnToPoint(-27.184, -30.719, 1000);
-        chassis.moveToPoint(-27.184, -30.719, 1000);
+        pros::delay(500);
+        chassis.turnToPoint(-28.184, -30.719, 1000);
+        chassis.moveToPoint(-28.184, -30.719, 1500);
         chassis.waitUntilDone();
-        pros::delay(2000);
         intake.move(-127);
         mogo_unclamp();
-        chassis.turnToPoint(-32.036, -42.597, 750);
-        chassis.moveToPoint(-32.036, -42.597, 750);
-        chassis.turnToHeading(47 + 180, 250);
+        chassis.turnToPoint(-34.036, -42.597, 750);
+        chassis.moveToPoint(-34.036, -42.597, 750);
+        chassis.turnToHeading(52.5 + 180, 250);
         chassis.waitUntilDone();
         doinker.set_value(1);
         pros::delay(500);
-        chassis.turnToPoint(1.064, -16.969, 750, {.forwards=false});
         chassis.moveToPoint(1.064, -16.969, 1000, {.forwards=false});
         chassis.waitUntilDone();
         doinker.set_value(0);

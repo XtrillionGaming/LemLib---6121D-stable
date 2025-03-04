@@ -29,7 +29,7 @@ namespace skills {
         // Place bot up against alliance stake
         // First Side - 1st mogo + allaince
         // run_intake(127);
-        chassis.moveToPoint(0, 28 * 0.03803125, 1000);
+        chassis.moveToPoint(0, 25 * 0.03803125, 1000);
         chassis.waitUntilDone();
         run_intake(127);
         pros::delay(500);
@@ -136,16 +136,19 @@ namespace skills {
         
         chassis.setPose(X, Y2, chassis.getPose().theta);
 
+
         run_intake(127);
         chassis.moveToPoint(10.9, 112.33, 2000); // TODO
         chassis.waitUntilDone();
         doinker.set_value(1);
-        chassis.turnToPoint(4.07, 110.71, 750, {.forwards=false});
+        chassis.turnToPoint(4.07, 113.71, 750, {.forwards=false});
         chassis.waitUntilDone();
         doinker.set_value(0);
+        pros::delay(500);
+        run_outtake(-127);
         rightMotors.move(70);
         leftMotors.move(70);
-        pros::delay(1500);
+        pros::delay(2000);
         rightMotors.move(0);
         leftMotors.move(0);
         pros::delay(500);
@@ -153,12 +156,13 @@ namespace skills {
         chassis.waitUntilDone();
         mogo_clamp();
         pros::delay(500);
-        chassis.turnToPoint(-10.19, 110.72, 750);
+        chassis.turnToPoint(-10.19, 114.72, 750);
         chassis.waitUntilDone();
         mogo_unclamp();
-        rightMotors.move(70);
-        leftMotors.move(70);
-        pros::delay(1500);
+        run_outtake(-127);
+        rightMotors.move(125);
+        leftMotors.move(125); 
+        pros::delay(2000);
         rightMotors.move(0);
         leftMotors.move(0);
         pros::delay(500);
@@ -166,10 +170,11 @@ namespace skills {
         chassis.waitUntilDone();
         mogo_clamp();
         run_intake(127);
-        chassis.turnToPoint(-22.62, 75.67, 750);
-        chassis.moveToPoint(-22.62, 75.67, 1000);
+        chassis.turnToPoint(-29.62, 75.67, 750);
+        chassis.moveToPoint(-29.62, 75.67, 1000);
         chassis.turnToPoint(-47.76, 75.01, 750);
         chassis.moveToPoint(-47.76, 75.01, 1000);
+        chassis.waitUntilDone();
 
         halt_intake();
 

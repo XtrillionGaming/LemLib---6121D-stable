@@ -2,7 +2,7 @@
 #define COMMON_DEFINITIONS
 
 #define INTAKE_SPEED -127
-#define SCORE_FULL 160
+#define SCORE_FULL 145
 
 // motor groups
 pros::MotorGroup leftMotors({-1, -8, -14}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
