@@ -1,6 +1,7 @@
 
 
 #include "api.h"
+#include "chassis.hpp"
 #include "lemlib/api.hpp"
 #include "common_definitions.h"
 #include "main.h"
@@ -35,6 +36,55 @@ namespace Right {
         chassis.moveToPoint(2.425, -53.003, 1000);
         chassis.waitUntilDone();
         halt_intake();
+        while (true) {
+            int wallstake_pid_output = wallstakePID.update(SCORE_FULL - filter_angle(ladybrown_sensor.get_angle()/100));
+            wall.move(wallstake_pid_output);
+            pros::delay(10);
+        }
+    }
+
+    static void RingRush(lemlib::Chassis& chassis) {
+        //face alliance stake left
+        //score alliance stake
+        chassis.moveToPoint(0, 0, 500);
+        chassis.moveToPoint(5.062, -4.158, 500, {.forwards = false});
+        chassis.turnToPoint(-11.029, 11.571, 500);
+        chassis.moveToPoint(-11.029, 11.571, 500);
+        //pick up mogo
+        chassis.turnToPoint(11.571, 11.39, 500);
+        chassis.moveToPoint(-34.894, 13.198, 500, {.forwards = false});
+        mogo_clamp();
+        chassis.waitUntilDone();
+        intake.move(-127);
+        chassis.turnToPoint(-50.624, 21.153, 500);
+        chassis.moveToPoint(-50.624, 21.153, 500);
+        //score ring
+        chassis.turnToPoint(-51.166, 26.939, 500);
+        chassis.moveToPoint(-51.166, 26.939, 500);
+        //ring to ladybrown
+        chassis.turnToPoint(-50.443, 33.809, 500);
+        chassis.moveToPoint(-50.443, 33.809, 500);
+        chassis.turnToPoint(-46.104, 49.177, 500);
+        chassis.moveToPoint(-46.104, 49.177, 500);
+        intake.move(-127);
+        pros::delay(200);
+        intake.move(0);
+        //wall stake
+        chassis.turnToPoint(-35.075, 36.702, 500);
+        chassis.moveToPoint(-48.273, 50.262, 500, {.forwards = false});
+        //reverse
+        chassis.turnToPoint(-58.579, 52.974, 500);
+        chassis.moveToPoint(-33.629, 50.081, 500, {.forwards = false});
+        intake.move(-127);
+        //score ring
+        chassis.turnToPoint(-35.075, 36.702, 500);
+        chassis.moveToPoint(-35.075, 36.702, 500);
+        //raise intake and score
+        chassis.turnToPoint(-11.752, -10.306, 500);
+        chassis.moveToPoint(-11.752, -10.306, 500);
+        //run into ladder
+        chassis.turnToPoint(-26.577, -10.486, 500);
+        chassis.moveToPoint(-26.577, -10.486, 500);
         while (true) {
             int wallstake_pid_output = wallstakePID.update(SCORE_FULL - filter_angle(ladybrown_sensor.get_angle()/100));
             wall.move(wallstake_pid_output);
