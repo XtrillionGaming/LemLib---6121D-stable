@@ -1,6 +1,7 @@
 #ifndef COMMON_DEFINITIONS
 #define COMMON_DEFINITIONS
 
+#include "pros/motor_group.hpp"
 #define INTAKE_SPEED -127
 #define SCORE_FULL 550
 
