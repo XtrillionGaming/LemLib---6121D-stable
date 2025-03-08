@@ -21,13 +21,13 @@ pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation horizontalEnc(13);
+pros::Rotation horizontalEnc(9);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -5.5);
 // vertical tracking wheel encoder. Rotation sensor, port 20, not reversed
-pros::Rotation verticalEnc(5);
-// vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0.25);
+// pros::Rotation verticalEnc(5);
+// // vertical tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
+// lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0.25);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
@@ -63,7 +63,7 @@ lemlib::ControllerSettings angularController(0.92, // .9, // proportional gain (
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
+lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
@@ -154,6 +154,7 @@ void opcontrol() {
 	bool is_intake_on = false;
     int goal_wallstake_angle = 0;
 	wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
+    wall.set_encoder_units(pros::motor_encoder_units_e::E_MOTOR_ENCODER_DEGREES);
     while (true) {
         // get joystick positions
         int leftY = Master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
@@ -175,7 +176,7 @@ void opcontrol() {
         if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 			goal_wallstake_angle = 0;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
-			goal_wallstake_angle = 35;
+			goal_wallstake_angle = 100;
 		} else if (Master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 			goal_wallstake_angle = SCORE_FULL;
 		}
@@ -183,7 +184,7 @@ void opcontrol() {
         doinker.set_value(Master.get_digital(pros::E_CONTROLLER_DIGITAL_R1));
 
 		// set PID for wallstake
-		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - filter_angle(ladybrown_sensor.get_angle()/100));
+		int wallstake_pid_output = wallstakePID.update(goal_wallstake_angle - wall.get_position());
 		wall.move(wallstake_pid_output);
 
 		mogo.set_value(is_intake_on);

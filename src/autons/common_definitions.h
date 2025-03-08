@@ -2,24 +2,24 @@
 #define COMMON_DEFINITIONS
 
 #define INTAKE_SPEED -127
-#define SCORE_FULL 145
+#define SCORE_FULL 550
 
 // motor groups
-pros::MotorGroup leftMotors({-1, -8, -14}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
-pros::MotorGroup rightMotors({9, 16, 18}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
+pros::MotorGroup leftMotors({-1, -4, -6}, pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
+pros::MotorGroup rightMotors({8, 17, 18}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
 pros::adi::DigitalOut mogo('A');
 pros::adi::DigitalOut doinker('B');
-pros::MotorGroup intake({12, 19});
-pros::MotorGroup wall({6});
+pros::MotorGroup intake({-3, 7});
+pros::MotorGroup wall({11});
 lemlib::PID wallstakePID(1.5, 0, 1, 10, 0);
 
-pros::Rotation ladybrown_sensor(-7);
-pros::Distance distance_sensor_back(17);
-pros::Distance distance_sensor_right(11);
+pros::Rotation ladybrown_sensor(69);
+pros::Distance distance_sensor_back(69);
+pros::Distance distance_sensor_right(69);
 
 // Inertial Sensor on port 10
-pros::Imu imu(15);
+pros::Imu imu(69);
 
 // Runs the intake in
 static void run_intake(int speed) {

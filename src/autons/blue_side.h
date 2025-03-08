@@ -64,7 +64,7 @@ namespace Left {
         chassis.moveToPoint(29.227, -41.256, 1000, {.maxSpeed = 50});
         chassis.waitUntilDone();
         while (true) {
-            int wallstake_pid_output = wallstakePID.update(SCORE_FULL - filter_angle(ladybrown_sensor.get_angle()/100));
+            int wallstake_pid_output = wallstakePID.update(SCORE_FULL - ladybrown_sensor.get_angle());
             wall.move(wallstake_pid_output);
             pros::delay(10);
         }
