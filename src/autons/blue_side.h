@@ -1,25 +1,24 @@
 
 
 #include "api.h"
-#include "chassis.hpp"
 #include "lemlib/api.hpp"
 #include "common_definitions.h"
 #include "main.h"
 
 namespace Blue {
-
+ 
 namespace Right {
     // align to closest mobile goal right up against the wall (4 points)
     static void GoalRush(lemlib::Chassis& chassis) {
         chassis.turnToPoint(-0, -37.415, 500, {.forwards = false});
-        chassis.moveToPoint(-0, -37.415, 1000, {.forwards = false});
+        chassis.moveToPoint(-0, -37.415, 1250, {.forwards = false, .maxSpeed=70});
         chassis.waitUntilDone();
         mogo_clamp();
         pros::delay(500);
         run_intake(-127);
         pros::delay(500);
-        chassis.turnToPoint(28.184, -30.719, 1000);
-        chassis.moveToPoint(28.184, -30.719, 1500);
+        chassis.turnToPoint(28.184, -34.719, 1000);
+        chassis.moveToPoint(28.184, -34.719, 1500);
         chassis.waitUntilDone();
         intake.move(-127);
         mogo_unclamp();
@@ -44,49 +43,54 @@ namespace Right {
     }
 
     static void RingRush(lemlib::Chassis& chassis) {
-        //face alliance stake left
-        //score alliance stake
-        chassis.moveToPoint(0, 0, 500);
-        chassis.moveToPoint(5.062, -4.158, 500, {.forwards = false});
-        chassis.turnToPoint(-11.029, 11.571, 500);
-        chassis.moveToPoint(-11.029, 11.571, 500);
-        //pick up mogo
-        chassis.turnToPoint(11.571, 11.39, 500);
-        chassis.moveToPoint(-34.894, 13.198, 500, {.forwards = false});
+        // chassis.setPose(-14.55, -2.06, -53.08);
+        // for (int i = 0; i < 100; i++) {
+        //     int wallstake_pid_output = wallstakePID.update(SCORE_FULL - wall.get_position());
+        //     wall.move(wallstake_pid_output);
+        //     pros::delay(10);
+        // }
+        // for (int i = 0; i < 100; i++) {
+        //     int wallstake_pid_output = wallstakePID.update(160 - wall.get_position());
+        //     wall.move(wallstake_pid_output);
+        //     pros::delay(10);
+        // }
+        // run_intake(127);
+        // pros::delay(600);
+        // halt_intake();
+        
+        // wall.move(127);
+        // pros::delay(500);
+        // wall.move(0);
+        // pros::delay(250);
+        // chassis.turnToHeading(5, 250);
+
+        chassis.moveToPoint(0.0, -37.41, 1250, {.forwards=false, .maxSpeed=70});
+        chassis.waitUntilDone();
+        // for (int i = 0; i < 500; i++) { 
+        //     int wallstake_pid_output = wallstakePID.update(0 - wall.get_position());
+        //     wall.move(wallstake_pid_output);
+        //     pros::delay(1);
+        // }
+        
         mogo_clamp();
+        pros::delay(500);
+        chassis.turnToPoint(-16.1, -60.77, 750);
+        // chassis.turnToHeading(90, 750);
         chassis.waitUntilDone();
         intake.move(-127);
-        chassis.turnToPoint(-50.624, 21.153, 500);
-        chassis.moveToPoint(-50.624, 21.153, 500);
-        //score ring
-        chassis.turnToPoint(-51.166, 26.939, 500);
-        chassis.moveToPoint(-51.166, 26.939, 500);
-        //ring to ladybrown
-        chassis.turnToPoint(-50.443, 33.809, 500);
-        chassis.moveToPoint(-50.443, 33.809, 500);
-        chassis.turnToPoint(-46.104, 49.177, 500);
-        chassis.moveToPoint(-46.104, 49.177, 500);
-        intake.move(-127);
-        pros::delay(200);
-        intake.move(0);
-        //wall stake
-        chassis.turnToPoint(-35.075, 36.702, 500);
-        chassis.moveToPoint(-48.273, 50.262, 500, {.forwards = false});
-        //reverse
-        chassis.turnToPoint(-58.579, 52.974, 500);
-        chassis.moveToPoint(-33.629, 50.081, 500, {.forwards = false});
-        intake.move(-127);
-        //score ring
-        chassis.turnToPoint(-35.075, 36.702, 500);
-        chassis.moveToPoint(-35.075, 36.702, 500);
-        //raise intake and score
-        chassis.turnToPoint(-11.752, -10.306, 500);
-        chassis.moveToPoint(-11.752, -10.306, 500);
-        //run into ladder
-        chassis.turnToPoint(-26.577, -10.486, 500);
-        chassis.moveToPoint(-26.577, -10.486, 500);
+        chassis.moveToPose(-16.1, -64.00, 180, 1500);
+        chassis.moveToPose(-1, -51.06, 57, 1000, {.forwards=false});
+        chassis.turnToPoint(-26.7, -42.05, 500);
+        chassis.moveToPoint(-26.7, -42.05, 1000);
+        chassis.turnToPoint(-26.81, -57.74, 750);
+        chassis.moveToPoint(-26.81, -57.74, 1500);
+        chassis.moveToPoint(-16.53, -48.50, 1000, {.forwards=false});
+        chassis.turnToPoint(29.227, -41.256, 750);
+        chassis.moveToPoint(10, -41.256, 1000, {.maxSpeed = 50});
+        chassis.waitUntilDone();
+
         while (true) {
-            int wallstake_pid_output = wallstakePID.update(SCORE_FULL - filter_angle(ladybrown_sensor.get_angle()/100));
+            int wallstake_pid_output = wallstakePID.update(SCORE_FULL - wall.get_position());
             wall.move(wallstake_pid_output);
             pros::delay(10);
         }

@@ -16,6 +16,23 @@
 #include "autons/prog_skills.h"
 #include "autons/pidTest.h"
 
+int jam_count = 0;
+static void avoidJamIntake() {
+    if (intake.get_power(0) > 3) {
+        jam_count++;
+    } else {
+        jam_count = 0;
+    }
+
+    if (jam_count > 10) {
+        intake.move(127);
+        pros::delay(500);
+        intake.move(0);
+        jam_count = 0;
+    }
+}
+
+
 // controller
 pros::Controller Master(pros::E_CONTROLLER_MASTER);
 
@@ -40,7 +57,7 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 
 // lateral motion controller
 lemlib::ControllerSettings linearController(4.5, // proportional gain (kP)
-                                            0.2, // integral gain (kI)
+                                            0.1, // integral gain (kI)
                                             9, // derivative gain (kD)
                                             3, // anti windup
                                             0, // small error range, in inches
@@ -52,7 +69,7 @@ lemlib::ControllerSettings linearController(4.5, // proportional gain (kP)
 
 // angular motion controller
 lemlib::ControllerSettings angularController(0.92, // .9, // proportional gain (kP)
-                                             0.1, // .1, // integral gain (kI)
+                                             0.05, // .1, // integral gain (kI)
                                              0, // 0, // derivative gain (kD)
                                              3, // 3, // anti windup
                                              0, // 0.00001, // small error range, in degrees
@@ -96,7 +113,6 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
 void initialize() {
     pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
-    ladybrown_sensor.reset_position();
 
     // the default rate is 50. however, if you need to change the rate, you
     // can do the following.
@@ -113,7 +129,8 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            Master.print(0, 0, "Sensor: %i", distance_sensor_back.get_distance());
+            pros::lcd::print(3, "right: %i", distance_sensor_right.get());
+            pros::lcd::print(4, "back: %i", distance_sensor_back.get());
             
             // log position telemetry
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
@@ -143,14 +160,19 @@ void competition_initialize() {}
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-    skills::auton_skills(chassis);
+    wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
+    wall.set_encoder_units(pros::motor_encoder_units_e::E_MOTOR_ENCODER_DEGREES);
+    Blue::Left::RingRush(chassis);
+    // skills::auton_skills_better(chassis);
+
+    // chassis.moveToPoint(0, 20, 5000);
 }
 /**
  * Runs in driver control
  */ 
 void opcontrol() {
-    // controller
-    // loop to continuously update motors
+    // // controller
+    // // loop to continuously update motors
 	bool is_intake_on = false;
     int goal_wallstake_angle = 0;
 	wall.set_encoder_units_all(pros::MotorEncoderUnits::degrees);
@@ -169,6 +191,8 @@ void opcontrol() {
 		} else {
 			intake.move(0);
 		}
+        // avoidJamIntake();
+
         if (Master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) { 
 			is_intake_on = !is_intake_on;
 		}

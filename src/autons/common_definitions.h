@@ -11,16 +11,16 @@ pros::MotorGroup rightMotors({8, 17, 18}, pros::MotorGearset::blue); // right mo
 
 pros::adi::DigitalOut mogo('A');
 pros::adi::DigitalOut doinker('B');
-pros::MotorGroup intake({-3, 7});
+pros::MotorGroup intake({-3, 19});
 pros::MotorGroup wall({11});
 lemlib::PID wallstakePID(1.5, 0, 1, 10, 0);
 
-pros::Rotation ladybrown_sensor(69);
-pros::Distance distance_sensor_back(69);
-pros::Distance distance_sensor_right(69);
+pros::Rotation ladybrown_sensor(16);
+pros::Distance distance_sensor_back(15);
+pros::Distance distance_sensor_right(10);
 
 // Inertial Sensor on port 10
-pros::Imu imu(69);
+pros::Imu imu(14);
 
 // Runs the intake in
 static void run_intake(int speed) {
